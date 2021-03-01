@@ -1,0 +1,18 @@
+ibrary(tidyverse)
+
+library(ggplot2)
+
+## Preprocessing #### 
+covid <- read_csv("https://covid19.who.int/WHO-COVID-19-global-data.csv")
+
+head(covid)
+unique(covid$WHO_region)
+dim(covid)
+covid = covid%>% mutate(day = as.numeric(format(covid$Date_reported, format = '%d')))
+covid = covid%>% mutate(month = as.numeric(format(covid$Date_reported, format = '%m')))
+covid = covid%>% mutate(year = as.numeric(format(covid$Date_reported, format = '%Y')))
+covid %>% select(year:day) %>% head()
+covid = subset(covid, select = -Date_reported)
+americas = covid %>% filter(WHO_region == "AMRO")
+head(americas)
+print(americas[1,2])
