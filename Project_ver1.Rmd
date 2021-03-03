@@ -16,7 +16,7 @@ library(dplyr)
 ```{r}
 covid <- read_csv("https://covid19.who.int/WHO-COVID-19-global-data.csv")
 
-policy <- read_excel("Gov_Responses2Covid19_last.xlsx")
+policy <- read_excel("Data/Gov_Responses2Covid19_last.xlsx")
 ```
 
 ```{r}
