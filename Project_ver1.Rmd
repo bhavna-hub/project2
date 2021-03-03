@@ -1,0 +1,98 @@
+---
+title: "Project2_ver1"
+author: "Bhavna Murthy"
+date: "3/2/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(readxl)
+library(dplyr)
+```
+
+
+```{r}
+covid <- read_csv("https://covid19.who.int/WHO-COVID-19-global-data.csv")
+
+policy <- read_excel("Gov_Responses2Covid19_last.xlsx")
+```
+
+```{r}
+by_country <- policy %>%
+  group_by(country)
+
+policy2 <- by_country %>%
+  subset(d=='31aug2020' | d=='01apr2020')
+
+for (x in 1:nrow(policy2)) {
+  if (policy2$d[x]=='31aug2020') {
+    policy2$d[x]<-'2020-08-31' 
+  }
+  else {
+    policy2$d[x]<-'2020-4-01'
+  }
+} 
+
+covid2 <- covid %>%
+  subset(Date_reported=='2020-08-31' | Date_reported=='2020-04-01') 
+
+policy2$date<-as.Date(policy2$d, "%Y-%m-%d")
+
+policy2<-policy2 %>%
+  subset(select=-c(d))
+
+df<-merge(x=policy2, y=covid2, by.x=c("geoid", "date"), by.y=c("Country_code", "Date_reported"))
+df<-df %>%
+  mutate(case_proportion=(Cumulative_cases/as.numeric(population_2019))) 
+
+df
+
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+
+Adding case mortality column
+```{r}
+df$Case_mort = df$Cumulative_deaths/df$Cumulative_cases
+```
+
+```{r}
+head(df)
+```
+
+#summary statistics
+```{r}
+# earliet date
+min(covid$Date_reported)
+```
+```{r}
+# Latest date
+max(covid$Date_reported)
+```
+
+```{r}
+# Halfway point
+median(covid$Date_reported)
+```
+
+```{r}
+summary(df$cases)
+```
+
+```{r}
+summary(df$deaths)
+```
+
+```{r}
+summary(df$Case_mort)
+```
+
+
+```{r}
+df[which.max(df$Case_mort),]
+```
+
+
