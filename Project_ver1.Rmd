@@ -175,11 +175,6 @@ boxplot(df.augresult.ld$case.growth, df.augresult.nold$case.growth,
         ylim=c(0,1000),
         main='Boxplot of case proportion growth rate from Apr to Aug based on Apr 1st lockdown policy')
 
-case.growth<-((df$case_proportion[which(df$date=='2020-08-31')]-df$case_proportion[which(df$date=='2020-04-01')])/df$case_proportion[which(df$date=='2020-04-01')]) * 100
-
-
-df$case.growth<-rep(case.growth, each=2)
-
 ```
 
 
