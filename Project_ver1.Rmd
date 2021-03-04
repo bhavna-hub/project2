@@ -100,14 +100,6 @@ df[which.max(df$Case_mort),]
 ```{r}
 ### GENERATE BOXPLOT FOR COUNTRIES WHICH HAD MASK POLICY IN APRIL VERSUS NO MASK POLICY IN APRIL ###
 
-
-df.maskon <- df %>%
-  group_by(masks, date)
-  
-
-summarize(df.maskon, mymean=mean(case_proportion, na.rm=TRUE))
-
-
 df.maskapril<-subset(df, masks==1 & date=='2020-04-01')
 
 df.augresult<-subset(df, df$country %in% df.maskapril$country & date=='2020-08-31')
@@ -124,7 +116,32 @@ nomask.result<-summary(df.augresult.nm$case_proportion)
 boxplot(df.augresult$case_proportion, df.augresult.nm$case_proportion,
         names=c('Mask policy in April', 'No mask policy in April'),
         ylim=c(0, 0.02),
-        main='Boxplot of case proportions in August based on April mask policy')
+        main='Boxplot of case proportions in August based on April 1st mask policy')
 ```
+
+```{r}
+### GENERATE BOXPLOT FOR COUNTRIES WHICH HAD TESTING POLICY IN APRIL VERSUS ###
+### NO TESTING POLICY IN APRIL ###
+
+df.test.april<-subset(df, testing==1 & date=='2020-04-01')
+
+df.augresult.test<-subset(df, df$country %in% df.test.april$country & date=='2020-08-31')
+
+test.result<-summary(df.augresult.test$case_proportion)
+
+
+df.notest.april<-subset(df, testing==0 & date=='2020-04-01')
+
+df.augresult.notest<-subset(df, df$country %in% df.notest.april$country & date=='2020-08-31')
+
+nomass.result<-summary(df.augresult.notest$case_proportion)
+
+boxplot(df.augresult.test$case_proportion, df.augresult.notest$case_proportion,
+        names=c('Testing Policy in April', 'No Testing Policy in April'),
+        ylim=c(0, 0.02),
+        main='Boxplot of case proportions in August based on April 1st testing policy')
+```
+
+
 
 
