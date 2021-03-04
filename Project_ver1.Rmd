@@ -108,11 +108,13 @@ df[which.max(df$Case_mort),]
 ### CREATE VARIABLE FOR CASE PROPORTION GROWTH RATE BETWEEN APRIL AND AUGUST ###
 ### Growth rate = (current value - lagged value) / (lagged value)
 
-case.growth<-((df$case_proportion[which(df$date=='2020-08-31')]-df$case_proportion[which(df$date=='2020-04-01')])/df$case_proportion[which(df$date=='2020-04-01')]) 
+#case.growth<-((df$case_proportion[which(df$date=='2020-08-31')]-df$case_proportion[which(df$date=='2020-04-01')])/df$case_proportion[which(df$date=='2020-04-01')]) 
+
+#df$case.growth<-rep(case.growth, each=2)
+
+case.growth<-((df$Cumulative_cases[which(df$date=='2020-08-31')]-df$Cumulative_cases[which(df$date=='2020-04-01')])/df$Cumulative_cases[which(df$date=='2020-04-01')]) 
 
 df$case.growth<-rep(case.growth, each=2)
-
-df
 ```
 
 ```{r}
@@ -134,7 +136,7 @@ nomask.result<-summary(df.augresult.nm$case_proportion)
 boxplot(df.augresult$case.growth, df.augresult.nm$case.growth,
         names=c('Mask policy in April', 'No mask policy in April'),
         ylim=c(0, 1000),
-        main='Boxplot of case proportion growth rate from Apr to Aug based on Apr 1st mask policy')
+        main='Cumulative case growth rate from Apr to Aug based on Apr 1st mask policy')
 ```
 
 ```{r}
@@ -157,7 +159,7 @@ nomass.result<-summary(df.augresult.notest$case.growth)
 boxplot(df.augresult.test$case.growth, df.augresult.notest$case.growth,
         names=c('Testing Policy in April', 'No Testing Policy in April'),
         ylim=c(0, 1000),
-        main='Boxplot of case proportion growth rate from Apr to Aug based on Apr 1st testing policy')
+        main='Cumulative case growth rate from Apr to Aug based on Apr 1st testing policy')
 ```
 
 ```{r}
@@ -180,15 +182,15 @@ nold.result<-summary(df.augresult.nold$case_proportion)
 boxplot(df.augresult.ld$case.growth, df.augresult.nold$case.growth,
         names=c('Lockdown Policy in April', 'No Lockdown Policy in April'),
         ylim=c(0,1000),
-        main='Boxplot of case proportion growth rate from Apr to Aug based on Apr 1st lockdown policy')
+        main='Cumulative case growth rate from Apr to Aug based on Apr 1st lockdown policy')
 
 ```
 
 
 ```{r}
-april_masking = subset(df$masks, df$date = "'2020-04-01'")
-august_case_prop = subset(df$case_proportion, date ='2020-08-31' )
-august_case_mort = subset(df$Case_mort, date=  '2020-08-31')
+april_masking = subset(df$masks, df$date == '2020-04-01')
+august_case_prop = subset(df$case_proportion, df$date =='2020-08-31' )
+august_case_mort = subset(df$Case_mort, df$date==  '2020-08-31')
 ggplot()+
   geom_point(mapping = aes(x= august_case_prop, y = august_case_mort, fill = april_masking)) +
   xlab("Case proportion in August") +
