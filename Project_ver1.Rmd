@@ -202,9 +202,9 @@ boxplot(df.augresult.ld$case.growth, df.augresult.nold$case.growth,
 # Can be used for anova model
 masking_policy_april = subset(df, date =='2020-04-01')
 august_results = subset(df, date == "2020-08-31")
-df1 = data.frame(masking_policy_april$country, august_results$case.growth, masking_policy_april$masks,
-                 masking_policy_april$domestic,
-                 masking_policy_april$testing )
+df1 = data.frame( country =masking_policy_april$country, case_growth = august_results$case.growth, masks =masking_policy_april$masks,
+                 lockdown =masking_policy_april$domestic,
+                 testing =masking_policy_april$testing )
 ```
 
 
