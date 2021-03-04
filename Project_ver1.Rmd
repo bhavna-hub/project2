@@ -7,7 +7,7 @@ output: html_document
 ## Abstract
 
 ## Introduction
-
+Is there a difference in case proportion among countries in the WHO region of Americas that implemented a mask mandate by April 1? If so did the countries with a mask policy in place by April 1 have lower case proportions?
 ## Background
 
 ## Decriptive Analysis
