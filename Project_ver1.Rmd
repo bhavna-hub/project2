@@ -97,6 +97,17 @@ summary(df$Case_mort)
 df[which.max(df$Case_mort),]
 ```
 
+
+```{r}
+### CREATE VARIABLE FOR CASE PROPORTION GROWTH RATE BETWEEN APRIL AND AUGUST ###
+
+case.growth<-((df$case_proportion[which(df$date=='2020-08-31')]-df$case_proportion[which(df$date=='2020-04-01')])/df$case_proportion[which(df$date=='2020-04-01')]) 
+
+df$case.growth<-rep(case.growth, each=2)
+
+df
+```
+
 ```{r}
 ### GENERATE BOXPLOT FOR COUNTRIES WHICH HAD MASK POLICY IN APRIL VERSUS NO MASK POLICY IN APRIL ###
 
@@ -113,7 +124,7 @@ df.augresult.nm<-subset(df, df$country %in% df.nomaskapril$country & date=='2020
 
 nomask.result<-summary(df.augresult.nm$case_proportion)
 
-boxplot(df.augresult$case_proportion, df.augresult.nm$case_proportion,
+boxplot(df.augresult$case.growth, df.augresult.nm$case.growth,
         names=c('Mask policy in April', 'No mask policy in April'),
         ylim=c(0, 0.02),
         main='Boxplot of case proportions in August based on April 1st mask policy')
@@ -140,6 +151,35 @@ boxplot(df.augresult.test$case_proportion, df.augresult.notest$case_proportion,
         names=c('Testing Policy in April', 'No Testing Policy in April'),
         ylim=c(0, 0.02),
         main='Boxplot of case proportions in August based on April 1st testing policy')
+```
+
+```{r}
+### GENERATE BOXPLOT FOR COUNTRIES WHICH HAD LOCKDOWN POLICY IN APRIL VERSUS ###
+### NO LOCKDOWN POLICY IN APRIL ###
+
+df.ld.april<-subset(df, domestic==1 & date=='2020-04-01')
+
+df.augresult.ld<-subset(df, df$country %in% df.ld.april$country & date=='2020-08-31')
+
+ld.result<-summary(df.augresult.ld$case_proportion)
+
+
+df.nold.april<-subset(df, domestic==0 & date=='2020-04-01')
+
+df.augresult.nold<-subset(df, df$country %in% df.nold.april$country & date=='2020-08-31')
+
+nold.result<-summary(df.augresult.nold$case_proportion)
+
+boxplot(df.augresult.ld$case.growth, df.augresult.nold$case.growth,
+        names=c('Lockdown Policy in April', 'No Lockdown Policy in April'),
+        #ylim=c(0),
+        main='Boxplot of case proportions in August based on April 1st Lockdown policy')
+
+case.growth<-((df$case_proportion[which(df$date=='2020-08-31')]-df$case_proportion[which(df$date=='2020-04-01')])/df$case_proportion[which(df$date=='2020-04-01')]) * 100
+
+
+df$case.growth<-rep(case.growth, each=2)
+
 ```
 
 
