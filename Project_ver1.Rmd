@@ -126,8 +126,8 @@ nomask.result<-summary(df.augresult.nm$case_proportion)
 
 boxplot(df.augresult$case.growth, df.augresult.nm$case.growth,
         names=c('Mask policy in April', 'No mask policy in April'),
-        ylim=c(0, 0.02),
-        main='Boxplot of case proportions in August based on April 1st mask policy')
+        ylim=c(0, 1000),
+        main='Boxplot of case proportion growth rate from Apr to Aug based on Apr 1st mask policy')
 ```
 
 ```{r}
@@ -138,19 +138,19 @@ df.test.april<-subset(df, testing==1 & date=='2020-04-01')
 
 df.augresult.test<-subset(df, df$country %in% df.test.april$country & date=='2020-08-31')
 
-test.result<-summary(df.augresult.test$case_proportion)
+test.result<-summary(df.augresult.test$case.growth)
 
 
 df.notest.april<-subset(df, testing==0 & date=='2020-04-01')
 
 df.augresult.notest<-subset(df, df$country %in% df.notest.april$country & date=='2020-08-31')
 
-nomass.result<-summary(df.augresult.notest$case_proportion)
+nomass.result<-summary(df.augresult.notest$case.growth)
 
-boxplot(df.augresult.test$case_proportion, df.augresult.notest$case_proportion,
+boxplot(df.augresult.test$case.growth, df.augresult.notest$case.growth,
         names=c('Testing Policy in April', 'No Testing Policy in April'),
-        ylim=c(0, 0.02),
-        main='Boxplot of case proportions in August based on April 1st testing policy')
+        ylim=c(0, 1000),
+        main='Boxplot of case proportion growth rate from Apr to Aug based on Apr 1st testing policy')
 ```
 
 ```{r}
@@ -172,8 +172,8 @@ nold.result<-summary(df.augresult.nold$case_proportion)
 
 boxplot(df.augresult.ld$case.growth, df.augresult.nold$case.growth,
         names=c('Lockdown Policy in April', 'No Lockdown Policy in April'),
-        #ylim=c(0),
-        main='Boxplot of case proportions in August based on April 1st Lockdown policy')
+        ylim=c(0,1000),
+        main='Boxplot of case proportion growth rate from Apr to Aug based on Apr 1st lockdown policy')
 
 case.growth<-((df$case_proportion[which(df$date=='2020-08-31')]-df$case_proportion[which(df$date=='2020-04-01')])/df$case_proportion[which(df$date=='2020-04-01')]) * 100
 
