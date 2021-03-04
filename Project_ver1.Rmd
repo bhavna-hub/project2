@@ -58,7 +58,7 @@ df<-merge(x=policy2, y=covid2, by.x=c("geoid", "date"), by.y=c("Country_code", "
 df<-df %>%
   mutate(case_proportion=(Cumulative_cases/as.numeric(population_2019))) 
 
-df %>% mutate(mask = as.factor(masks),
+df %>% mutate(masks = as.factor(masks),
              domestic = as.factor(domestic),
              testing = as.factor(testing))
 df
@@ -194,6 +194,18 @@ boxplot(df.augresult.ld$case.growth, df.augresult.nold$case.growth,
 ```
 
 
+
+## Inferential Analysis
+```{r}
+## Created a dataframe with just the country, growth rate in August, whether mask testing, lockdown in April
+
+# Can be used for anova model
+masking_policy_april = subset(df, date =='2020-04-01')
+august_results = subset(df, date == "2020-08-31")
+df1 = data.frame(masking_policy_april$country, august_results$case.growth, masking_policy_april$masks,
+                 masking_policy_april$domestic,
+                 masking_policy_april$testing )
+```
 
 
 
