@@ -207,5 +207,15 @@ df1 = data.frame( country =masking_policy_april$country, case_growth = august_re
                  testing =masking_policy_april$testing )
 ```
 
+```{r}
+# REMOVE NA's to get ready for model
+df1 = na.omit(df1)
+df1 = subset(df1, df$case_growth!= Inf)
+# Also need to remove infinities
+```
+
+
+```
+
 
 
