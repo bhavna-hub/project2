@@ -4,6 +4,14 @@ author: "Bhavna Murthy"
 date: "3/2/2021"
 output: html_document
 ---
+## Introduction
+The WHO COVID Global dataset collects information on COVID cases an deaths from countries around the world.
+
+Our main question of interest is whether countries that had a mask mandate in place before April 1 had different cumulative Case counts by August 31 in the WHO region of the Americas.
+
+```{r}
+2+2
+```
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -49,7 +57,7 @@ df<-merge(x=policy2, y=covid2, by.x=c("geoid", "date"), by.y=c("Country_code", "
 df<-df %>%
   mutate(case_proportion=(Cumulative_cases/as.numeric(population_2019))) 
 
-df
+df = df%>% filter(WHO_region == "AMRO")
 
 ```
 
@@ -141,7 +149,6 @@ boxplot(df.augresult.test$case_proportion, df.augresult.notest$case_proportion,
         ylim=c(0, 0.02),
         main='Boxplot of case proportions in August based on April 1st testing policy')
 ```
-
 
 
 
