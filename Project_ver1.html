@@ -380,10 +380,8 @@ summary {
 
 <div id="introduction" class="section level2">
 <h2>Introduction</h2>
-<p>The WHO COVID Global dataset collects information on COVID cases an deaths from countries around the world.</p>
-<p>Our main question of interest is whether countries that had a mask mandate in place before April 1 had different cumulative Case counts by August 31 in the WHO region of the Americas.</p>
-<pre class="r"><code>2+2</code></pre>
-<pre><code>## [1] 4</code></pre>
+<p>The WHO COVID Global dataset collects information on COVID cases and deaths from countries around the world. For each country it record the new cases and deaths every day since January 3 2020. It includes variables such as cumalatative case and cumulative deaths. The Gov_Repsonses2COVId19 dataset has variables that correspond to actions or policies that different countries take in response to COVID such as mask obligation policies and curfews. We merged these two datasets by country to show what happened in each country and how they responded.</p>
+<p>Our main question of interest is whether countries that had a mask mandate in place before April 1 had different cumulative Case counts by August 31 in the WHO region of the Americas. If there is, did countries with mask mandates have lower case numbers? Because masks prevent body fluid from traveling from one person to another, countries that did have mask policies may have lower case counts.</p>
 <pre class="r"><code>covid &lt;- read_csv(&quot;https://covid19.who.int/WHO-COVID-19-global-data.csv&quot;)</code></pre>
 <pre><code>## 
 ## ── Column specification ────────────────────────────────────────────────────────
