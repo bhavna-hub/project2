@@ -7,7 +7,7 @@ output: html_document
 ## Abstract
 
 ## Introduction
-We are using two data ssets in this report; WHO Global COVID19 and GOV_Responses2COVID19. The WHO Global data set has recorded case counts and other variables from all over the world. Some variables of interest are the cumulative cases, cumulative deaths and new cases. Each row tabulates the new cases and deaths reported for each day since January 3 2020 for each country. It also updates cumulative cases and deaths. The GOV_Responses2COVID19 dataset has among others some binary variables that indicate whether a country has implemented policies such as testing and masks.
+We are using two data sets in this report; WHO Global COVID19 and GOV_Responses2COVID19. The WHO Global data set has recorded case counts and other variables from all over the world. Some variables of interest are the cumulative cases, cumulative deaths and new cases. Each row tabulates the new cases and deaths reported for each day since January 3 2020 for each country. It also updates cumulative cases and deaths. The GOV_Responses2COVID19 dataset has among others some binary variables that indicate whether a country has implemented policies such as testing and masks.
 
 This report seeks to find out whether implementing which policy among testing, masks and lockdown before April 1 have significant effect on a countries case proportion growth rate between April and August. Testing will allow cases to be caught early enough so that people can go into isolation and prevent it being spread to other people. So it can be hypothesized that countries with testing facilities may have lower case proportion growth. Masks prevent air from flowing from one person to another. This prevents highly infectious diseases like COVID19 from spreading. Countries requiring masks would have a lower case proportion growth. Implementing a lockdown also slows the spread of COVID19.
 
@@ -210,7 +210,7 @@ df1 = data.frame( country =masking_policy_april$country, case_growth = august_re
 ```{r}
 # REMOVE NA's to get ready for model
 df1 = na.omit(df1)
-df1 = subset(df1, df$case_growth!= Inf)
+
 # Also need to remove infinities
 ```
 
