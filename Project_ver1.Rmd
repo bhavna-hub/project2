@@ -10,6 +10,8 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(readxl)
 library(dplyr)
+library(ggplot2)
+library(reshape2)
 ```
 
 
@@ -93,6 +95,36 @@ summary(df$Case_mort)
 
 ```{r}
 df[which.max(df$Case_mort),]
+```
+
+```{r}
+### GENERATE BOXPLOT FOR COUNTRIES WHICH HAD MASK POLICY IN APRIL VERSUS NO MASK POLICY IN APRIL ###
+
+
+df.maskon <- df %>%
+  group_by(masks, date)
+  
+
+summarize(df.maskon, mymean=mean(case_proportion, na.rm=TRUE))
+
+
+df.maskapril<-subset(df, masks==1 & date=='2020-04-01')
+
+df.augresult<-subset(df, df$country %in% df.maskapril$country & date=='2020-08-31')
+
+mask.result<-summary(df.augresult$case_proportion)
+
+
+df.nomaskapril<-subset(df, masks==0 & date=='2020-04-01')
+
+df.augresult.nm<-subset(df, df$country %in% df.nomaskapril$country & date=='2020-08-31')
+
+nomask.result<-summary(df.augresult.nm$case_proportion)
+
+boxplot(df.augresult$case_proportion, df.augresult.nm$case_proportion,
+        names=c('Mask policy in April', 'No mask policy in April'),
+        ylim=c(0, 0.02),
+        main='Boxplot of case proportions in August based on April mask policy')
 ```
 
 
