@@ -9,7 +9,7 @@ output: html_document
 ## Introduction
 We are using two data ssets in this report; WHO Global COVID19 and GOV_Responses2COVID19. The WHO Global data set has recorded case counts and other variables from all over the world. Some variables of interest are the cumulative cases, cumulative deaths and new cases. Each row tabulates the new cases and deaths reported for each day since January 3 2020 for each country. It also updates cumulative cases and deaths. The GOV_Responses2COVID19 dataset has among others some binary variables that indicate whether a country has implemented policies such as testing and masks.
 
-Our main question of interest; Is there a difference in case proportion among countries in the WHO region of Americas that implemented a mask mandate by April 1? And if so did the countries with a mask policy in place by April 1 have lower case proportions? Masks prevent air from flowing from one person to another. This prevents highly infectious diseases like COVID19 from spreading. So it can be hypothesized that the countries requiring masks would have a lower case proportion.
+This report seeks to find out whether implementing which policy among lockdown, masks and testing before April 1 have significant effect on a countries case proportion growth rate between April and August.  Masks prevent air from flowing from one person to another. This prevents highly infectious diseases like COVID19 from spreading. So it can be hypothesized that the countries requiring masks would have a lower case proportion. 
 
 ## Background
 
@@ -79,6 +79,7 @@ head(df)
 # earliet date
 min(covid$Date_reported)
 ```
+
 ```{r}
 # Latest date
 max(covid$Date_reported)
