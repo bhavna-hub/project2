@@ -7,7 +7,10 @@ output: html_document
 ## Abstract
 
 ## Introduction
-Is there a difference in case proportion among countries in the WHO region of Americas that implemented a mask mandate by April 1? If so did the countries with a mask policy in place by April 1 have lower case proportions?
+We are using two data ssets in this report; WHO Global COVID19 and GOV_Responses2COVID19. The WHO Global data set has recorded case counts and other variables from all over the world. Some variables of interest are the cumulative cases, cumulative deaths and new cases. Each row tabulates the new cases and deaths reported for each day since January 3 2020 for each country. It also updates cumulative cases and deaths. The GOV_Responses2COVID19 dataset has among others some binary variables that indicate whether a country has implemented policies such as testing and masks.
+
+Our main question of interest; Is there a difference in case proportion among countries in the WHO region of Americas that implemented a mask mandate by April 1? And if so did the countries with a mask policy in place by April 1 have lower case proportions? Masks prevent air from flowing from one person to another. This prevents highly infectious diseases like COVID19 from spreading. So it can be hypothesized that the countries requiring masks would have a lower case proportion.
+
 ## Background
 
 ## Decriptive Analysis
@@ -188,6 +191,7 @@ boxplot(df.augresult.ld$case.growth, df.augresult.nold$case.growth,
 
 
 ```{r}
+### CREATE SCATTER PlOT OF CASE PROPORTION VS CASE MORTALITY RATE WITH FILL AS MASK POLICY IN APRIL
 april_masking = subset(df$masks, df$date == '2020-04-01')
 august_case_prop = subset(df$case_proportion, df$date =='2020-08-31' )
 august_case_mort = subset(df$Case_mort, df$date==  '2020-08-31')
