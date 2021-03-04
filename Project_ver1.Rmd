@@ -7,7 +7,10 @@ output: html_document
 ## Introduction
 The WHO COVID Global dataset collects information on COVID cases and deaths from countries around the world. For each country it record the new cases and deaths every day since January 3 2020. It includes variables such as cumalatative case and cumulative deaths. The Gov_Repsonses2COVId19 dataset has variables that correspond to actions or policies that different countries take in response to COVID such as mask obligation policies and curfews. We merged these two datasets by country to show what happened in each country and how they responded.     
 
-Our main question of interest is whether countries that had a mask mandate in place before April 1 had different cumulative Case counts by August 31 in the WHO region of the Americas. If there is, did countries with mask mandates have lower case numbers? Because masks prevent body fluid from traveling from one person to another, countries that did have mask policies may have lower case counts.
+Our main question of interest is whether countries that had a mask mandate in place before April 1 had different cumulative Case counts by August 31 in the WHO region of the Americas. If there is, did countries with mask mandates have lower case numbers? Because masks prevent body fluid from traveling from one person to another, countries that did have mask policies may have lower case counts. It will help policymakers legislate to bring down COVID cases in the continuing pandemic. It will also help health workers deal diseases similar to COVID in the future.
+
+## Background
+
 
 
 
@@ -76,6 +79,8 @@ head(df)
 # earliet date
 min(covid$Date_reported)
 ```
+
+
 ```{r}
 # Latest date
 max(covid$Date_reported)
@@ -147,6 +152,9 @@ boxplot(df.augresult.test$case_proportion, df.augresult.notest$case_proportion,
         ylim=c(0, 0.02),
         main='Boxplot of case proportions in August based on April 1st testing policy')
 ```
+
+
+
 
 
 
