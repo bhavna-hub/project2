@@ -257,16 +257,9 @@ summary(test)
 plot(test)
 ```
 
-```{r}
-fit.anova = aov(case_growth~ testing +masks+lockdown, data =df1)
-```
 
 
 
-## Sensitivity Analysis
-```{r}
-plot(fit.anova)
-```
 
 
 
