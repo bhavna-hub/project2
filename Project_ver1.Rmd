@@ -228,33 +228,45 @@ boxplot(df.augresult.ld$case.growth, df.augresult.nold$case.growth,
 ## Created a dataframe with just the country, growth rate in August, whether mask testing, lockdown in April
 
 # Can be used for anova model
-masking_policy_april = subset(df, date =='2020-04-01')
-august_results = subset(df, date == "2020-08-31")
-df1 = data.frame( country =masking_policy_april$country, case_growth = august_results$case.growth, masks =masking_policy_april$masks,
-                 lockdown =masking_policy_april$domestic,
-                 testing =masking_policy_april$testing )
+#masking_policy_april = subset(df, date =='2020-04-01')
+#august_results = subset(df, date == "2020-08-31")
+#df1 = data.frame( country =masking_policy_april$country, case_growth = august_results$case.growth, masks =masking_policy_april$masks,
+                 #lockdown =masking_policy_april$domestic,
+                 #testing =masking_policy_april$testing )
 ```
 
 ```{r}
-# REMOVE NA's to get ready for model
-df1 = na.omit(df1)
-sum(is.na(df1))
-
-# Also need to remove infinities
-df1 = df1 %>% filter(case_growth <10e4)
-
 
 
 ### Adam model ###
 
-test<-glm(data=df, formula=case_proportion[which(date=='2020-08-31')]~
+for (country in 1:nrow(df)) {
+  
+  df$growth2[country]<-log(df$Cumulative_cases[country+1])-log(df$Cumulative_cases[country])
+}
+
+na.index<-is.na(df$growth2)
+inf.index<-is.infinite(df$growth2)
+nan.index<-is.nan(df$growth2)
+df.growthrates<-df[!na.index & !inf.index & !nan.index,]
+
+
+
+model_case.proportion<-glm(data=df, formula=case_proportion[which(date=='2020-08-31')]~
             masks[which(date=='2020-04-01')]+testing[which(date=='2020-04-01')]+
             domestic[which(date=='2020-04-01')]+rest[which(date=='2020-04-01')])
 
 
-summary(test)
+model_growth.rate<-lm(data=df.test, formula=growth2[which(date=='2020-04-01')]~
+            masks[which(date=='2020-04-01')]+testing[which(date=='2020-04-01')]+
+            domestic[which(date=='2020-04-01')]+rest[which(date=='2020-04-01')])
 
-plot(test)
+
+summary(model_case.proportion)
+summary(model_growth.rate)
+
+plot(model_growth.rate)
+
 ```
 
 
