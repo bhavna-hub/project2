@@ -225,7 +225,7 @@ Our primary question of interest is whether certain policies enacted at the nati
 
 A secondary question of interest then entails which of these different policies, if any, are associated with country wide case proportions measured five months later on August 31, as well as the average growth rate of cases during that same five month interval. 
 
-For the purposes of this study, case proportion is defined as $X_i/N_i$, where $X_i$ represents the cumulative cases recorded for the i-th country on August 31 of 2020, and $N_i$ corresponds to that country's population in 2019. 
+For the purposes of this study, case proportion is defined as $X_i/N_i$, where $X_i$ represents the cumulative cases recorded for the i-th country on August 31 of 2020, and $N_i$ corresponds to that country's population in 2019. Cumulative case growth rate is defined as the difference in natural logarithms $ln(X_{i,{t+1}})-ln(X_{i,t})$, which approximates percent change $(X_{i,{t+1}}-X_{i,t})/X_{i,t}$, Where $X_{i,{t+1}}$ corresponds to the number of cumulative cases recorded within the i-th country on August 31st, and $X_{i,t}$ corresponds to the number of cumulative cases recorded in the i-th country on April 1st.
 ```{r}
 ## Created a dataframe with just the country, growth rate in August, whether mask testing, lockdown in April
 
