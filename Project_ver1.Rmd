@@ -257,14 +257,66 @@ model_growth.rate<-lm(data=df.growthrates, formula=growth2[which(date=='2020-04-
 summary(model_case.proportion)
 summary(model_growth.rate)
 
-plot(model_growth.rate)
-
 ```
 
 
+## Sensitivity Analysis
+
+```{r}
+plot(model_case.proportion,which =1)
+```
+
+The residuals versus fitted plot shows the spread widening as the predicted values increases. This indicates that that the errors do not have equal variance. If the errors were normally distributed the errors would have be spread evenly and randomly around the 0 line. Observations 20,253 and 165 seems to have a high variance.
+```{r}
+plot(model_case.proportion,which =2)
+```
+
+The normal Q-Q plot shows that the errors have heavy tail on the right. Again observations 20,153,165 are contributing to the problem. The errors are not normally distributed.
+
+```{r}
+plot(model_case.proportion,which =3)
+```
+
+The scale location plot is also used to check the equal variance assumption. Again it is visible that the spread of variance increases as the predicted value increases. Also as expected observations 20, 153 and 165 are still outliers.
+```{r}
+plot(model_case.proportion,which =4)
+```
 
 
+The residuals versus Leverage plot shows that the spread of standardized residuals is decreasing indicating that the variances are unequal. There are no observations outside the red lines so that there are no highly influentail data points.
+
+Using an alternative model that looked at case growth rate in August as the response variable the we get the following sensitivity results for the model.
+```{r}
+# New case growth rate model
+plot(model_growth.rate,which =1)
+```
+
+The residuals versus fitted plot for case growth rate is evenly and randomly spread spread over the line y=0. The spread does get wider slightly around predicted value 4.0. But the errors do have equal variance. Observations 86 and 139 are high outliers. While 24 is low outlier.
+
+```{r}
+plot(model_growth.rate,which =2)
+```
+    
+From the normal Q-Q plot the residuals have lighter tail on both ends. But it looks symmetrically lighter. And they do follow the line mostly. So the errors are normally distributed. The outliers 86,139 and 24 are pulling the distribution away from normal.
+
+```{r}
+plot(model_growth.rate,which =3)
+```
+
+The scale location plot shows that the red line is almost horizontal. The spread does get larger towards higher fitted values but it centered. We can back up the claim that the errors have equal variance. Observations 139 and 24 are noted as outliers.
+
+```{r}
+plot(model_growth.rate,which =4)
+```
 
 
+Cook's distance measures the influence certain observations have on distributions. The higher Cook's distance is the more influential the observation is. Observations 16,86,99 are noted have large Cook's distance.
 
+```{r}
+  tmp =df.growthrates$growth2[which(df.growthrates$date=='2020-04-01')]
+mean(tmp)
+sd(tmp)
+tmp[86]
+```
+So observation 86 had a case growth rate 2 standard deviations above the mean.
 
