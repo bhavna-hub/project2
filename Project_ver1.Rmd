@@ -215,8 +215,22 @@ df1 = data.frame( country =masking_policy_april$country, case_growth = august_re
 # REMOVE NA's to get ready for model
 df1 = na.omit(df1)
 sum(is.na(df1))
+
 # Also need to remove infinities
 df1 = df1 %>% filter(case_growth <10e4)
+
+
+
+### Adam model ###
+
+test<-glm(data=df, formula=case_proportion[which(date=='2020-08-31')]~
+            masks[which(date=='2020-04-01')]+testing[which(date=='2020-04-01')]+
+            domestic[which(date=='2020-04-01')]+rest[which(date=='2020-04-01')])
+
+
+summary(test)
+
+plot(test)
 ```
 
 ```{r}
