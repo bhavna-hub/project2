@@ -178,7 +178,50 @@ boxplot(df.augresult.ld$case.growth, df.augresult.nold$case.growth,
 case.growth<-((df$case_proportion[which(df$date=='2020-08-31')]-df$case_proportion[which(df$date=='2020-04-01')])/df$case_proportion[which(df$date=='2020-04-01')]) * 100
 
 
+<<<<<<< Updated upstream
 df$case.growth<-rep(case.growth, each=2)
+=======
+## Inferential Analysis
+```{r}
+## Created a dataframe with just the country, growth rate in August, whether mask testing, lockdown in April
+
+# Can be used for anova model
+masking_policy_april = subset(df, date =='2020-04-01')
+august_results = subset(df, date == "2020-08-31")
+df1 = data.frame( country =masking_policy_april$country, case_growth = august_results$case.growth, masks =masking_policy_april$masks,
+                 lockdown =masking_policy_april$domestic,
+                 testing =masking_policy_april$testing )
+
+
+
+```
+
+```{r}
+# REMOVE NA's to get ready for model
+df1 = na.omit(df1)
+sum(is.na(df1))
+# Also need to remove infinities
+df1 = df1 %>% filter(case_growth <10e4)
+
+
+df.model<- df
+library(plm)
+test<-glm(data=df.model, formula=case_proportion[which(date=='2020-08-31')]~
+            masks[which(date=='2020-04-01')]+testing[which(date=='2020-04-01')]+
+            domestic[which(date=='2020-04-01')])
+
+
+summary(test)
+
+plot(test)
+```
+
+```{r}
+
+```
+
+
+>>>>>>> Stashed changes
 
 ```
 
