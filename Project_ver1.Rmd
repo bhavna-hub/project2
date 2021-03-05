@@ -208,7 +208,7 @@ df.model<- df
 library(plm)
 test<-glm(data=df.model, formula=case_proportion[which(date=='2020-08-31')]~
             masks[which(date=='2020-04-01')]+testing[which(date=='2020-04-01')]+
-            domestic[which(date=='2020-04-01')])
+            domestic[which(date=='2020-04-01')]+rest[which(date=='2020-04-01')])
 
 
 summary(test)
