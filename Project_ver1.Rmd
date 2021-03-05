@@ -4,7 +4,20 @@ author: "Bhavna Murthy"
 date: "3/2/2021"
 output: html_document
 ---
+## Abstract
 
+## Introduction
+Our main question of interest for this exploratory data analysis is whether or not there is a difference in the new case proportion growth rate between April and August amongst countries in the “Americas” region (per WHO classification) that had implemented a mask mandate, testing, and/or lockdown policy by April 1st, 2020 versus those that didn’t implement all or part of these policies by that time. If a difference is apparent, a follow-up question would be whether or not countries with a mask mandate in place had lower proportions of new cases when compared to countries that did not implement all or part of such measures until after April 1st, 2020.
+
+The results of this data analysis could better inform us on the effectiveness of mask and testing policy in stemming the spread of COVID-19. In turn, this information could have significant public policy implications as countries decide whether or not to implement mask mandates and introduce more widespread testing to combat the COVID-19 pandemic. The results of this analysis can be used to build political and public support either for or against these measures based on its results. Additionally, if such policies are shown to be effective in stemming the spread of COVID-19, this analysis would allow researchers to better forecast the impact of COVID-19 on countries based on whether or not they had implemented the mentioned policies by April 1st, 2020.
+
+We will be examining two datasets in this report. One was produced by the World Health Organization (WHO) regarding the COVID-19 pandemic. This dataset features the following variables of interest: number of new COVID cases, deaths attributable to COVID-19, and a cumulative measure of both data points since January 3rd, 2020 until the present. Data has been compiled from all countries that are members of the WHO. The second dataset was published in the journal Nature and includes data from the European Center for Disease Prevention and Control, Oxford, and other sources. This particular dataset examines the response of governments to COVID-19. Some of the key variables from this dataset that will be relied on for this report include: obligation to wear masks (binary value tracking whether or not mask mandate is in place), testing policy (binary value tracking whether or not a public testing policy is in place), number of new cases reported each day for each respective country, etc.
+
+At the onset, we hypothesize that because masks prevent air from flowing between persons, they will be effective in reducing the transmission of COVID-19 amongst a population. Therefore, we expect to see that countries that implemented the mask mandate on or before April 1st, 2020 had a lower new case proportion growth versus countries that did not implement such policies until after the mentioned date. Furthermore, having a public testing policy would allow COVID-19 cases to be caught early on so that people can go into isolation and minimize their likelihood of spreading the virus to other people. Instituting a lockdown would be expected to have a similar impact. So it can also be hypothesized that countries with public testing policies and/or a lockdown in place may have lower new case proportion growth. 
+
+## Background
+
+## Decriptive Analysis
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
@@ -49,6 +62,9 @@ df<-merge(x=policy2, y=covid2, by.x=c("geoid", "date"), by.y=c("Country_code", "
 df<-df %>%
   mutate(case_proportion=(Cumulative_cases/as.numeric(population_2019))) 
 
+df %>% mutate(masks = as.factor(masks),
+             domestic = as.factor(domestic),
+             testing = as.factor(testing))
 df
 
 ```
@@ -70,6 +86,7 @@ head(df)
 # earliet date
 min(covid$Date_reported)
 ```
+
 ```{r}
 # Latest date
 max(covid$Date_reported)
@@ -100,12 +117,15 @@ df[which.max(df$Case_mort),]
 
 ```{r}
 ### CREATE VARIABLE FOR CASE PROPORTION GROWTH RATE BETWEEN APRIL AND AUGUST ###
+### Growth rate = (current value - lagged value) / (lagged value)
 
-case.growth<-((df$case_proportion[which(df$date=='2020-08-31')]-df$case_proportion[which(df$date=='2020-04-01')])/df$case_proportion[which(df$date=='2020-04-01')]) 
+#case.growth<-((df$case_proportion[which(df$date=='2020-08-31')]-df$case_proportion[which(df$date=='2020-04-01')])/df$case_proportion[which(df$date=='2020-04-01')]) 
+
+#df$case.growth<-rep(case.growth, each=2)
+
+case.growth<-((df$Cumulative_cases[which(df$date=='2020-08-31')]-df$Cumulative_cases[which(df$date=='2020-04-01')])/df$Cumulative_cases[which(df$date=='2020-04-01')]) 
 
 df$case.growth<-rep(case.growth, each=2)
-
-df
 ```
 
 ```{r}
@@ -126,8 +146,8 @@ nomask.result<-summary(df.augresult.nm$case_proportion)
 
 boxplot(df.augresult$case.growth, df.augresult.nm$case.growth,
         names=c('Mask policy in April', 'No mask policy in April'),
-        ylim=c(0, 0.02),
-        main='Boxplot of case proportions in August based on April 1st mask policy')
+        ylim=c(0, 1000),
+        main='Cumulative case growth rate from Apr to Aug based on Apr 1st mask policy')
 ```
 
 ```{r}
@@ -138,19 +158,19 @@ df.test.april<-subset(df, testing==1 & date=='2020-04-01')
 
 df.augresult.test<-subset(df, df$country %in% df.test.april$country & date=='2020-08-31')
 
-test.result<-summary(df.augresult.test$case_proportion)
+test.result<-summary(df.augresult.test$case.growth)
 
 
 df.notest.april<-subset(df, testing==0 & date=='2020-04-01')
 
 df.augresult.notest<-subset(df, df$country %in% df.notest.april$country & date=='2020-08-31')
 
-nomass.result<-summary(df.augresult.notest$case_proportion)
+nomass.result<-summary(df.augresult.notest$case.growth)
 
-boxplot(df.augresult.test$case_proportion, df.augresult.notest$case_proportion,
+boxplot(df.augresult.test$case.growth, df.augresult.notest$case.growth,
         names=c('Testing Policy in April', 'No Testing Policy in April'),
-        ylim=c(0, 0.02),
-        main='Boxplot of case proportions in August based on April 1st testing policy')
+        ylim=c(0, 1000),
+        main='Cumulative case growth rate from Apr to Aug based on Apr 1st testing policy')
 ```
 
 ```{r}
@@ -172,15 +192,14 @@ nold.result<-summary(df.augresult.nold$case_proportion)
 
 boxplot(df.augresult.ld$case.growth, df.augresult.nold$case.growth,
         names=c('Lockdown Policy in April', 'No Lockdown Policy in April'),
-        #ylim=c(0),
-        main='Boxplot of case proportions in August based on April 1st Lockdown policy')
+        ylim=c(0,1000),
+        main='Cumulative case growth rate from Apr to Aug based on Apr 1st lockdown policy')
 
-case.growth<-((df$case_proportion[which(df$date=='2020-08-31')]-df$case_proportion[which(df$date=='2020-04-01')])/df$case_proportion[which(df$date=='2020-04-01')]) * 100
+```
 
 
-<<<<<<< Updated upstream
-df$case.growth<-rep(case.growth, each=2)
-=======
+
+
 ## Inferential Analysis
 ```{r}
 ## Created a dataframe with just the country, growth rate in August, whether mask testing, lockdown in April
@@ -191,9 +210,6 @@ august_results = subset(df, date == "2020-08-31")
 df1 = data.frame( country =masking_policy_april$country, case_growth = august_results$case.growth, masks =masking_policy_april$masks,
                  lockdown =masking_policy_april$domestic,
                  testing =masking_policy_april$testing )
-
-
-
 ```
 
 ```{r}
@@ -202,27 +218,17 @@ df1 = na.omit(df1)
 sum(is.na(df1))
 # Also need to remove infinities
 df1 = df1 %>% filter(case_growth <10e4)
-
-
-df.model<- df
-library(plm)
-test<-glm(data=df.model, formula=case_proportion[which(date=='2020-08-31')]~
-            masks[which(date=='2020-04-01')]+testing[which(date=='2020-04-01')]+
-            domestic[which(date=='2020-04-01')]+rest[which(date=='2020-04-01')])
-
-
-summary(test)
-
-plot(test)
 ```
 
 ```{r}
-
+fit.anova = aov(case_growth~ testing +masks+lockdown, data =df1)
 ```
 
 
->>>>>>> Stashed changes
 
+## Sensitivity Analysis
+```{r}
+plot(fit.anova)
 ```
 
 
