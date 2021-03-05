@@ -11,7 +11,7 @@ Our main question of interest for this exploratory data analysis is whether or n
 
 The results of this data analysis could better inform us on the effectiveness of mask and testing policy in stemming the spread of COVID-19. In turn, this information could have significant public policy implications as countries decide whether or not to implement mask mandates and introduce more widespread testing to combat the COVID-19 pandemic. The results of this analysis can be used to build political and public support either for or against these measures based on its results. Additionally, if such policies are shown to be effective in stemming the spread of COVID-19, this analysis would allow researchers to better forecast the impact of COVID-19 on countries based on whether or not they had implemented the mentioned policies by April 1st, 2020.
 
-We will be examining two datasets in this report. One was produced by the World Health Organization (WHO) regarding the COVID-19 pandemic. This dataset features the following variables of interest: number of new COVID cases, deaths attributable to COVID-19, and a cumulative measure of both data points since January 3rd, 2020 until the present. Data has been compiled from all countries that are members of the WHO. The second dataset was published in the journal Nature and includes data from the European Centre for Disease Prevention and Control, Oxford, and other sources. This particular dataset examines the response of governments to COVID-19. Some of the key variables from this dataset that will be relied on for this report include: obligation to wear masks (binary value tracking whether or not mask mandate is in place), testing policy (binary value tracking whether or not a public testing policy is in place), number of new cases reported each day for each respective country, etc.
+We will be examining two datasets in this report. One was produced by the World Health Organization (WHO) regarding the COVID-19 pandemic. This dataset features the following variables of interest: number of new COVID cases, deaths attributable to COVID-19, and a cumulative measure of both data points since January 3rd, 2020 until the present. Data has been compiled from all countries that are members of the WHO. The second dataset was published in the journal Nature and includes data from the European Center for Disease Prevention and Control, Oxford, and other sources. This particular dataset examines the response of governments to COVID-19. Some of the key variables from this dataset that will be relied on for this report include: obligation to wear masks (binary value tracking whether or not mask mandate is in place), testing policy (binary value tracking whether or not a public testing policy is in place), number of new cases reported each day for each respective country, etc.
 
 At the onset, we hypothesize that because masks prevent air from flowing between persons, they will be effective in reducing the transmission of COVID-19 amongst a population. Therefore, we expect to see that countries that implemented the mask mandate on or before April 1st, 2020 had a lower new case proportion growth versus countries that did not implement such policies until after the mentioned date. Furthermore, having a public testing policy would allow COVID-19 cases to be caught early on so that people can go into isolation and minimize their likelihood of spreading the virus to other people. Instituting a lockdown would be expected to have a similar impact. So it can also be hypothesized that countries with public testing policies and/or a lockdown in place may have lower new case proportion growth. 
 
@@ -214,12 +214,22 @@ df1 = data.frame( country =masking_policy_april$country, case_growth = august_re
 ```{r}
 # REMOVE NA's to get ready for model
 df1 = na.omit(df1)
-
+sum(is.na(df1))
 # Also need to remove infinities
+df1 = df1 %>% filter(case_growth <10e4)
+```
+
+```{r}
+fit.anova = aov(case_growth~ testing +masks+lockdown, data =df1)
 ```
 
 
+
+## Sensitivity Analysis
+```{r}
+plot(fit.anova)
 ```
+
 
 
 
