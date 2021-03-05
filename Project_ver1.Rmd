@@ -62,10 +62,7 @@ df<-merge(x=policy2, y=covid2, by.x=c("geoid", "date"), by.y=c("Country_code", "
 df<-df %>%
   mutate(case_proportion=(Cumulative_cases/as.numeric(population_2019))) 
 
-df %>% mutate(masks = as.factor(masks),
-             domestic = as.factor(domestic),
-             testing = as.factor(testing))
-df
+
 
 ```
 
@@ -78,7 +75,7 @@ df$Case_mort = df$Cumulative_deaths/df$Cumulative_cases
 ```
 
 ```{r}
-head(df)
+glimpse(df)
 ```
 
 #summary statistics
@@ -116,37 +113,37 @@ df[which.max(df$Case_mort),]
 
 
 ```{r}
-### CREATE VARIABLE FOR CASE PROPORTION GROWTH RATE BETWEEN APRIL AND AUGUST ###
-### Growth rate = (current value - lagged value) / (lagged value)
+### CREATE VARIABLE FOR CASE GROWTH RATE BETWEEN APRIL 01 AND AUGUST 31 ###
+for (country in 1:nrow(df)) {
+  
+  df$growth2[country]<-log(df$Cumulative_cases[country+1])-log(df$Cumulative_cases[country])
+}
 
-#case.growth<-((df$case_proportion[which(df$date=='2020-08-31')]-df$case_proportion[which(df$date=='2020-04-01')])/df$case_proportion[which(df$date=='2020-04-01')]) 
-
-#df$case.growth<-rep(case.growth, each=2)
-
-case.growth<-((df$Cumulative_cases[which(df$date=='2020-08-31')]-df$Cumulative_cases[which(df$date=='2020-04-01')])/df$Cumulative_cases[which(df$date=='2020-04-01')]) 
-
-df$case.growth<-rep(case.growth, each=2)
+na.index<-is.na(df$growth2)
+inf.index<-is.infinite(df$growth2)
+nan.index<-is.nan(df$growth2)
+df.growthrates<-df[!na.index & !inf.index & !nan.index,]
 ```
 
 ```{r}
 ### GENERATE BOXPLOT FOR COUNTRIES WHICH HAD MASK POLICY IN APRIL VERSUS NO MASK POLICY IN APRIL ###
 
-df.maskapril<-subset(df, masks==1 & date=='2020-04-01')
+df.maskapril<-subset(df.growthrates, masks==1 & date=='2020-04-01')
 
-df.augresult<-subset(df, df$country %in% df.maskapril$country & date=='2020-08-31')
+df.augresult<-subset(df.growthrates, df$country %in% df.maskapril$country & date=='2020-04-01')
 
-mask.result<-summary(df.augresult$case_proportion)
+#mask.result<-summary(df.augresult$case_proportion)
 
 
-df.nomaskapril<-subset(df, masks==0 & date=='2020-04-01')
+df.nomaskapril<-subset(df.growthrates, masks==0 & date=='2020-04-01')
 
-df.augresult.nm<-subset(df, df$country %in% df.nomaskapril$country & date=='2020-08-31')
+df.augresult.nm<-subset(df.growthrates, df$country %in% df.nomaskapril$country & date=='2020-04-01')
 
-nomask.result<-summary(df.augresult.nm$case_proportion)
+#nomask.result<-summary(df.augresult.nm$case_proportion)
 
-boxplot(df.augresult$case.growth, df.augresult.nm$case.growth,
+boxplot(df.augresult$growth2, df.augresult.nm$growth2,
         names=c('Mask policy in April', 'No mask policy in April'),
-        ylim=c(0, 1000),
+        ylim=c(0, 10),
         main='Cumulative case growth rate from Apr to Aug based on Apr 1st mask policy')
 ```
 
@@ -154,22 +151,22 @@ boxplot(df.augresult$case.growth, df.augresult.nm$case.growth,
 ### GENERATE BOXPLOT FOR COUNTRIES WHICH HAD TESTING POLICY IN APRIL VERSUS ###
 ### NO TESTING POLICY IN APRIL ###
 
-df.test.april<-subset(df, testing==1 & date=='2020-04-01')
+df.test.april<-subset(df.growthrates, testing==1 & date=='2020-04-01')
 
-df.augresult.test<-subset(df, df$country %in% df.test.april$country & date=='2020-08-31')
+df.augresult.test<-subset(df.growthrates, df$country %in% df.test.april$country & date=='2020-04-01')
 
-test.result<-summary(df.augresult.test$case_proportion)
+#test.result<-summary(df.augresult.test$case_proportion)
 
 
-df.notest.april<-subset(df, testing==0 & date=='2020-04-01')
+df.notest.april<-subset(df.growthrates, testing==0 & date=='2020-04-01')
 
-df.augresult.notest<-subset(df, df$country %in% df.notest.april$country & date=='2020-08-31')
+df.augresult.notest<-subset(df.growthrates, df$country %in% df.notest.april$country & date=='2020-04-01')
 
-nomass.result<-summary(df.augresult.notest$case_proportion)
+#nomass.result<-summary(df.augresult.notest$case_proportion)
 
-boxplot(df.augresult.test$case.growth, df.augresult.notest$case.growth,
+boxplot(df.augresult.test$growth2, df.augresult.notest$growth2,
         names=c('Testing Policy in April', 'No Testing Policy in April'),
-        ylim=c(0, 1000),
+        ylim=c(0, 10),
         main='Cumulative case growth rate from Apr to Aug based on Apr 1st testing policy')
 ```
 
@@ -177,22 +174,22 @@ boxplot(df.augresult.test$case.growth, df.augresult.notest$case.growth,
 ### GENERATE BOXPLOT FOR COUNTRIES WHICH HAD LOCKDOWN POLICY IN APRIL VERSUS ###
 ### NO LOCKDOWN POLICY IN APRIL ###
 
-df.ld.april<-subset(df, domestic==1 & date=='2020-04-01')
+df.ld.april<-subset(df.growthrates, domestic==1 & date=='2020-04-01')
 
-df.augresult.ld<-subset(df, df$country %in% df.ld.april$country & date=='2020-08-31')
+df.augresult.ld<-subset(df.growthrates, df$country %in% df.ld.april$country & date=='2020-04-01')
 
-ld.result<-summary(df.augresult.ld$case_proportion)
+#ld.result<-summary(df.augresult.ld$case_proportion)
 
 
-df.nold.april<-subset(df, domestic==0 & date=='2020-04-01')
+df.nold.april<-subset(df.growthrates, domestic==0 & date=='2020-04-01')
 
-df.augresult.nold<-subset(df, df$country %in% df.nold.april$country & date=='2020-08-31')
+df.augresult.nold<-subset(df.growthrates, df$country %in% df.nold.april$country & date=='2020-04-01')
 
-nold.result<-summary(df.augresult.nold$case_proportion)
+#nold.result<-summary(df.augresult.nold$case_proportion)
 
-boxplot(df.augresult.ld$case.growth, df.augresult.nold$case.growth,
+boxplot(df.augresult.ld$growth2, df.augresult.nold$growth2,
         names=c('Lockdown Policy in April', 'No Lockdown Policy in April'),
-        ylim=c(0,1000),
+        ylim=c(0,10),
         main='Cumulative case growth rate from Apr to Aug based on Apr 1st lockdown policy')
 
 ```
@@ -201,22 +198,22 @@ boxplot(df.augresult.ld$case.growth, df.augresult.nold$case.growth,
 ### GENERATE BOXPLOT FOR COUNTRIES WHICH HAD RESTURANT POLICY IN APRIL VERSUS ###
 ### NO LOCKDOWN POLICY IN APRIL ###
 
-df.ld.april<-subset(df, rest==1 & date=='2020-04-01')
+df.ld.april<-subset(df.growthrates, rest==1 & date=='2020-04-01')
 
-df.augresult.ld<-subset(df, df$country %in% df.ld.april$country & date=='2020-08-31')
+df.augresult.ld<-subset(df.growthrates, df$country %in% df.ld.april$country & date=='2020-04-01')
 
 ld.result<-summary(df.augresult.ld$case_proportion)
 
 
-df.nold.april<-subset(df, rest==0 & date=='2020-04-01')
+df.nold.april<-subset(df.growthrates, rest==0 & date=='2020-04-01')
 
-df.augresult.nold<-subset(df, df$country %in% df.nold.april$country & date=='2020-08-31')
+df.augresult.nold<-subset(df.growthrates, df$country %in% df.nold.april$country & date=='2020-04-01')
 
 nold.result<-summary(df.augresult.nold$case_proportion)
 
-boxplot(df.augresult.ld$case.growth, df.augresult.nold$case.growth,
+boxplot(df.augresult.ld$growth2, df.augresult.nold$growth2,
         names=c('Restaurant Closures in April', 'No Rest. Closures in April'),
-        ylim=c(0,1000),
+        ylim=c(0,10),
         main='Cumulative case growth rate from Apr to Aug based on Apr 1st lockdown policy')
 
 ```
@@ -224,6 +221,11 @@ boxplot(df.augresult.ld$case.growth, df.augresult.nold$case.growth,
 
 
 ## Inferential Analysis
+Our primary question of interest is whether certain policies enacted at the national and sub-national level may be associated with different outcomes in terms of the cumulative case proportion and growth of cumulative cases a country experiences over a five month period. The policies we have examined include mask wearing obligations, testing implementation, lockdown enforcement, and restaurant closures. These policies were measured according to their implementation on April 1st of 2020. If the policy had been implemented at the national or local level by that date, then the variable takes a variable of one. If the policy had not been implemented, it takes a value of zero. 
+
+A secondary question of interest then entails which of these different policies, if any, are associated with country wide case proportions measured five months later on August 31, as well as the average growth rate of cases during that same five month interval. 
+
+For the purposes of this study, case proportion is defined as $X_i/N_i$, where $X_i$ represents the cumulative cases recorded for the i-th country on August 31 of 2020, and $N_i$ corresponds to that country's population in 2019. 
 ```{r}
 ## Created a dataframe with just the country, growth rate in August, whether mask testing, lockdown in April
 
@@ -240,16 +242,6 @@ boxplot(df.augresult.ld$case.growth, df.augresult.nold$case.growth,
 
 ### Adam model ###
 
-for (country in 1:nrow(df)) {
-  
-  df$growth2[country]<-log(df$Cumulative_cases[country+1])-log(df$Cumulative_cases[country])
-}
-
-na.index<-is.na(df$growth2)
-inf.index<-is.infinite(df$growth2)
-nan.index<-is.nan(df$growth2)
-df.growthrates<-df[!na.index & !inf.index & !nan.index,]
-
 
 
 model_case.proportion<-glm(data=df, formula=case_proportion[which(date=='2020-08-31')]~
@@ -257,7 +249,7 @@ model_case.proportion<-glm(data=df, formula=case_proportion[which(date=='2020-08
             domestic[which(date=='2020-04-01')]+rest[which(date=='2020-04-01')])
 
 
-model_growth.rate<-lm(data=df.test, formula=growth2[which(date=='2020-04-01')]~
+model_growth.rate<-lm(data=df.growthrates, formula=growth2[which(date=='2020-04-01')]~
             masks[which(date=='2020-04-01')]+testing[which(date=='2020-04-01')]+
             domestic[which(date=='2020-04-01')]+rest[which(date=='2020-04-01')])
 
