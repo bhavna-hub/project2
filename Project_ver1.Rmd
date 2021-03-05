@@ -158,14 +158,14 @@ df.test.april<-subset(df, testing==1 & date=='2020-04-01')
 
 df.augresult.test<-subset(df, df$country %in% df.test.april$country & date=='2020-08-31')
 
-test.result<-summary(df.augresult.test$case.growth)
+test.result<-summary(df.augresult.test$case_proportion)
 
 
 df.notest.april<-subset(df, testing==0 & date=='2020-04-01')
 
 df.augresult.notest<-subset(df, df$country %in% df.notest.april$country & date=='2020-08-31')
 
-nomass.result<-summary(df.augresult.notest$case.growth)
+nomass.result<-summary(df.augresult.notest$case_proportion)
 
 boxplot(df.augresult.test$case.growth, df.augresult.notest$case.growth,
         names=c('Testing Policy in April', 'No Testing Policy in April'),
@@ -192,6 +192,30 @@ nold.result<-summary(df.augresult.nold$case_proportion)
 
 boxplot(df.augresult.ld$case.growth, df.augresult.nold$case.growth,
         names=c('Lockdown Policy in April', 'No Lockdown Policy in April'),
+        ylim=c(0,1000),
+        main='Cumulative case growth rate from Apr to Aug based on Apr 1st lockdown policy')
+
+```
+
+```{r}
+### GENERATE BOXPLOT FOR COUNTRIES WHICH HAD RESTURANT POLICY IN APRIL VERSUS ###
+### NO LOCKDOWN POLICY IN APRIL ###
+
+df.ld.april<-subset(df, rest==1 & date=='2020-04-01')
+
+df.augresult.ld<-subset(df, df$country %in% df.ld.april$country & date=='2020-08-31')
+
+ld.result<-summary(df.augresult.ld$case_proportion)
+
+
+df.nold.april<-subset(df, rest==0 & date=='2020-04-01')
+
+df.augresult.nold<-subset(df, df$country %in% df.nold.april$country & date=='2020-08-31')
+
+nold.result<-summary(df.augresult.nold$case_proportion)
+
+boxplot(df.augresult.ld$case.growth, df.augresult.nold$case.growth,
+        names=c('Restaurant Closures in April', 'No Rest. Closures in April'),
         ylim=c(0,1000),
         main='Cumulative case growth rate from Apr to Aug based on Apr 1st lockdown policy')
 
