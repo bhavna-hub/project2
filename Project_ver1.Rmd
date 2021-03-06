@@ -1,6 +1,6 @@
 ---
-title: "Project2_ver1"
-author: "Bhavna Murthy"
+title: "STA 141: Analysis of Covid Case Growth Rates Across Different Countries"
+author: "Group 12"
 date: "3/2/2021"
 output: html_document
 ---
@@ -16,6 +16,19 @@ We will be examining two datasets in this report. One was produced by the World 
 At the onset, we hypothesize that because masks prevent air from flowing between persons, they will be effective in reducing the transmission of COVID-19 amongst a population. Therefore, we expect to see that countries that implemented the mask mandate on or before April 1st, 2020 had a lower new case proportion growth versus countries that did not implement such policies until after the mentioned date. Furthermore, having a public testing policy would allow COVID-19 cases to be caught early on so that people can go into isolation and minimize their likelihood of spreading the virus to other people. Instituting a lockdown would be expected to have a similar impact. So it can also be hypothesized that countries with public testing policies and/or a lockdown in place may have lower new case proportion growth. 
 
 ## Background
+
+As previously mentioned, two datasets were used in the creation of this analysis. The first such dataset was obtained from the WHO and featured variables pertaining to new cases of COVID-19 infections as well as deaths attributable to the virus. As aforementioned, this data had been harvested since January 3rd 2020 up to the present. The WHO went about obtaining the information needed for this dataset by collecting data via official communications, which were conducted per International Health Regulations, and supplemented this with data reported by countries’ governmental health agencies (this includes any information disclosed by these agencies on their websites and social media channels). During this process, the number of new cases and deaths catalogued were only recorded if these cases were laboratory-confirmed and fell within the WHO's definitions for confirmed cases. Specifically, in order to be classified as a new case of COVID-19, a person would have to have a positive Nucleic Acid Amplification Test result and/or be identified as being positive for the SARS-CoV-2 Antigen. Additional data apart from that reported by member countries was obtained from the European Center for Disease Prevention and Control. Possible sources of bias in this dataset may include: bias on the part of health ministries in WHO member countries when reporting their data, lack of accurate reporting from WHO member countries with underdeveloped health systems and lack of significant healthcare infrastructure, bias in the AI web-scraping algorithm used to harvest data from public press releases and social media posts made by governmental health agencies, etc.
+
+
+The second dataset was obtained from the University of Oxford’s COVID-19 Government response tracker and features several variables documenting the governmental response of countries to the COVID-19 pandemic. In total, 13 public health measures and 7 measures of economic policy were catalogued in this dataset. Each of these measures were assessed with a binary datapoint (1 or 0) depending on whether or not the policy indicated had been implemented by the country in question. In a few cases, a measure of “0.5” was used to denote partial implementation of a particular policy. Those of particular interest for this analysis included: obligation to wear masks in public settings, whether or not a public testing policy was in place, and whether or not a domestic lockdown had been initiated. Data for each of the public health measures catalogued by the dataset were obtained from the Assessment Capacities Project (ACAPs), the International Monetary Fund (IMF), and from information made publicly available by countries’ governmental health agencies. Possible sources of bias in this dataset may include: bias on the part of governmental health agencies when publicly disclosing information about their policy responses to COVID-19, lack of coordinated policy measures implemented by countries with weakly structured governments, etc.
+
+Citation: Hale, Thomas, Noam Angrist, Emily Cameron-Blake, Laura Hallas, Beatriz Kira, Saptarshi Majumdar, Anna Petherick, Toby Phillips, Helen Tatlow, Samuel Webster (2020). Oxford COVID-19 Government Response Tracker, Blavatnik School of Government.
+
+
+Existing research published in the American Journal of Tropical Medicine and Hygiene as well as by the National Academy of Sciences in the United States has shown that COVID-19 transmission rates are forecasted to be 7.5 times higher in countries without a mask mandate as opposed to countries with one in place. And as expected, countries with a mask mandate have a lower COVID-19 related mortality rate than those that have not implemented such policies. Additionally, it was observed that the duration of time spent in lockdown was inversely correlated with COVID-19 related mortality rate, which is also in line with expectations. On the other hand, increased public testing for COVID-19 was shown to not have a statistically significant relationship with COVID-19 related mortality rate. 
+Citation: Leffler, Christoper T, et al. “Association of Country-Wide Coronavirus Mortality with Demographics, Testing, Lockdowns, and Public Wearing of Masks.” The American Journal of Tropical Medicine and Hygiene, vol. 103, no. 6, 13 Aug. 2020, pp. 2400–2411., doi:https://doi.org/10.4269/ajtmh.20-1015. 
+
+
 
 ## Decriptive Analysis
 ```{r setup, include=FALSE}
@@ -223,9 +236,35 @@ boxplot(df.augresult.ld$growth2, df.augresult.nold$growth2,
 ## Inferential Analysis
 Our primary question of interest is whether certain policies enacted at the national and sub-national level may be associated with different outcomes in terms of the cumulative case proportion and growth of cumulative cases a country experiences over a five month period. The policies we have examined include mask wearing obligations, testing implementation, lockdown enforcement, and restaurant closures. These policies were measured according to their implementation on April 1st of 2020. If the policy had been implemented at the national or local level by that date, then the variable takes a variable of one. If the policy had not been implemented, it takes a value of zero. 
 
+It is important to emphasize that the goal of this model is not to assess causality, but to determine what factors are associated with certain outcomes.
+
 A secondary question of interest then entails which of these different policies, if any, are associated with country wide case proportions measured five months later on August 31, as well as the average growth rate of cases during that same five month interval. 
 
-For the purposes of this study, case proportion is defined as $X_i/N_i$, where $X_i$ represents the cumulative cases recorded for the i-th country on August 31 of 2020, and $N_i$ corresponds to that country's population in 2019. 
+For the purposes of this study, case proportion is defined as $X_i/N_i$, where $X_i$ represents the cumulative cases recorded for the i-th country on August 31 of 2020, and $N_i$ corresponds to that country's population in 2019. Cumulative case growth rate is defined as the difference in natural logarithms $ln(X_{i,{t+1}})-ln(X_{i,t})$ where $X_{i,{t+1}}$ corresponds to the number of cumulative cases recorded within the i-th country on August 31st, and $X_{i,t}$ corresponds to the number of cumulative cases recorded in the i-th country on April 1st.
+
+We first employ a linear regression model of the form:
+
+$$Y_{i,t+1}=\beta_0+\beta_1masks_{i,t}+\beta_2testing_{i,t}+\beta_3lockdown_{i,t}+\beta_4restaurants \space closed_{i,t} $$
+
+
+Where each variable is a dummy which takes a value of 1 if the i-th country implemented the respective policy in time period $t$. The outcome is cumulative cases in the i-th country as recorded in time period $t+1$.
+
+
+The second linear regression model takes a similar form: 
+
+$$Y_{i,t+1}=\beta_0+\beta_1masks_{i,t}+\beta_2testing_{i,t}+\beta_3lockdown_{i,t}+\beta_4restaurants \space closed_{i,t} $$
+
+except here the outcome is defined as the log difference in cumulative cases between April 1st and August 31st.
+
+Both models, being linear regression models, rely on several key assumptions. 
+
+      1) the expected value of the response variable is influenced additively (if no interaction terms are              present) and linearly by the factors
+
+      2) Each sample is independent and selected from an underlying population which is normally distributed
+
+      3) Homogeneity of variance between groups (Homoskedasticity)
+
+      4) The error terms are normally distributed with constant mean and variance
 ```{r}
 ## Created a dataframe with just the country, growth rate in August, whether mask testing, lockdown in April
 
@@ -253,12 +292,20 @@ model_growth.rate<-lm(data=df.growthrates, formula=growth2[which(date=='2020-04-
             masks[which(date=='2020-04-01')]+testing[which(date=='2020-04-01')]+
             domestic[which(date=='2020-04-01')]+rest[which(date=='2020-04-01')])
 
+model_growth.rate.av<-aov(model_growth.rate)
 
+summary(model_growth.rate.av)
 summary(model_case.proportion)
 summary(model_growth.rate)
 
 ```
 
+
+We find that the model which measures case proportion in August as an outcome finds restaurant closures to be significant at the $\alpha=0.5$ level. This first model also finds testing to have a statistically significant association with case proportions five months later, at the $\alpha=0.10$ level.
+
+For the second model, we find that testing has a statistically significant association with the difference in log of cumulative cases between August 31 and April 1st, at the $\alpha=0.01$ significance level.
+
+In the final project, we can use Tukey's Honestly Significantly Difference test to construct pairwise confidence intervals for the different groups.
 
 ## Sensitivity Analysis
 
@@ -319,4 +366,17 @@ sd(tmp)
 tmp[86]
 ```
 So observation 86 had a case growth rate 2 standard deviations above the mean.
+
+## Discussion & Conclusion ##
+
+In this report we performed an analysis of two data sets obtained from the World Health Organization and the  University of Oxford’s COVID-19 Government response tracker. Our question of interest is surrounded around the the new case proportion growth rate, specifically we want to study the differences in the new case growth rates between April and August in the “Americas” region that had a mask mandate, testing, and/or lockdown policy implemented by April 1st, 2020 versus those that didn’t. The key question is that if there is a statistically significant difference between the new case growth rates between the two groups and if we do find a significant difference in new case proportion growth rates, we want to know if those with lockdown, mask, and testing policies have lowered case proportions after implementing such measures. 
+
+
+To answer this question we first presented appropriate plots in the report. Among these plots were box plots that showed that when testing, masks, and/or lockdown procedures and policies were implemented the cumulative case growth from April to August were much lower than when these policies were not put into place by April 1st.  To test for statistical significance we constructed a multiple variable general linear model to fit our data set. We set the new case proportion growth rate as the response variable, and we set whether masks mandates, testing, lockdown policies and restaurant closures were implemented in the “America’s” region as the independent variables. This allowed us to statistically assess whether or not the difference in new case proportion growth rates were significant. We found that testing policy and mask policy were statistically significant at the 10% level, since the p-values < 0.1. Comparatively the restaurant closures were found to be statistically significant at the general 5% level as the p-value < 0.05. Additionally, we see that the coefficient estimate of the “rest” variable came out to be a negative value. This suggests that case growth and restaurant closures are negatively correlated, which means that case growth decreased as restaurant closures increased. To check that our assumptions for the generalized linear model were met, we performed sensitivity analysis on our data. We found that residuals from the model do not have equal variance as the residuals vs fitted plot shows that residuals seem to fan out as the fitted values increase. If the residuals were to truly have equal variance, the errors would be spread out  evenly around the zero line in our plot. It was also observed that the errors in the model are not normally distributed (confirmed using a normal Q-Q plot, which showed a heavy right tail). Another method to check the equal variance assumption was through the scale location plot and we found once again that the standardized pearson residuals drastically fan out and increase as the predicted values increase. 
+We also included a residuals vs leverage plot in our report which also shows that the variances of the residuals are not equal as the residuals spread out as the predictive values increase.
+
+ Because our assumptions of equal variances failed for the first model we propose an alternative model for this analysis that features the following factors in relation to the cumulative new cases growth rate: existence of mask mandate, implementation of lockdown, and closure of restaurants and public dining spaces. For this particular model, the residuals vs fitted values plot revealed that the errors did have equal variance, since the spread of the plotted residuals remained evenly spread over line y = 0 save for a handful of few outliers. Additionally, the normal Q-Q plot had a lighter tail than the previous model and did appear to be linear, indicating that the errors were normally distributed.
+
+For future research and policy making, one can create a model where vaccination and immunity data is also taken into consideration and applied into the model. This model would produce more current up to date results as vaccinations have just begun to ramp up in the “Americas” regions, which means that one can hypothesize that new case proportions would go down.
+
 
