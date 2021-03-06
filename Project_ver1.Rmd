@@ -32,7 +32,7 @@ Citation: Leffler, Christoper T, et al. “Association of Country-Wide Coronavir
 
 ## Decriptive Analysis
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning=FALSE)
 library(tidyverse)
 library(readxl)
 library(dplyr)
@@ -129,7 +129,7 @@ df[which.max(df$Case_mort),]
 ### CREATE VARIABLE FOR CASE GROWTH RATE BETWEEN APRIL 01 AND AUGUST 31 ###
 for (country in 1:nrow(df)) {
   
-  df$growth2[country]<-log(df$Cumulative_cases[country+1])-log(df$Cumulative_cases[country])
+  df$growth2[country]<-log(((df$Cumulative_cases[country+1])-(df$Cumulative_cases[country]))/(df$Cumulative_cases[country]))
 }
 
 na.index<-is.na(df$growth2)
@@ -160,7 +160,7 @@ boxplot(df.augresult$growth2, df.augresult.nm$growth2,
         main='Cumulative case growth rate from Apr to Aug based on Apr 1st mask policy')
 ```
 
-```{r}
+```{r, message=FALSE}
 ### GENERATE BOXPLOT FOR COUNTRIES WHICH HAD TESTING POLICY IN APRIL VERSUS ###
 ### NO TESTING POLICY IN APRIL ###
 
@@ -240,7 +240,7 @@ It is important to emphasize that the goal of this model is not to assess causal
 
 A secondary question of interest then entails which of these different policies, if any, are associated with country wide case proportions measured five months later on August 31, as well as the average growth rate of cases during that same five month interval. 
 
-For the purposes of this study, case proportion is defined as $X_i/N_i$, where $X_i$ represents the cumulative cases recorded for the i-th country on August 31 of 2020, and $N_i$ corresponds to that country's population in 2019. Cumulative case growth rate is defined as the difference in natural logarithms $ln(X_{i,{t+1}})-ln(X_{i,t})$ where $X_{i,{t+1}}$ corresponds to the number of cumulative cases recorded within the i-th country on August 31st, and $X_{i,t}$ corresponds to the number of cumulative cases recorded in the i-th country on April 1st.
+For the purposes of this study, case proportion is defined as $X_i/N_i$, where $X_i$ represents the cumulative cases recorded for the i-th country on August 31 of 2020, and $N_i$ corresponds to that country's population in 2019. Cumulative case growth rate is defined as $((X_{i,{t+1}})-(X_{i,t}))/(X_{i,t})$ where $X_{i,{t+1}}$ corresponds to the number of cumulative cases recorded within the i-th country on August 31st, and $X_{i,t}$ corresponds to the number of cumulative cases recorded in the i-th country on April 1st.
 
 We first employ a linear regression model of the form:
 
@@ -254,7 +254,7 @@ The second linear regression model takes a similar form:
 
 $$Y_{i,t+1}=\beta_0+\beta_1masks_{i,t}+\beta_2testing_{i,t}+\beta_3lockdown_{i,t}+\beta_4restaurants \space closed_{i,t} $$
 
-except here the outcome is defined as the log difference in cumulative cases between April 1st and August 31st.
+except here the outcome is defined as the log of growth rate in cumulative cases between April 1st and August 31st.
 
 Both models, being linear regression models, rely on several key assumptions. 
 
@@ -292,9 +292,7 @@ model_growth.rate<-lm(data=df.growthrates, formula=growth2[which(date=='2020-04-
             masks[which(date=='2020-04-01')]+testing[which(date=='2020-04-01')]+
             domestic[which(date=='2020-04-01')]+rest[which(date=='2020-04-01')])
 
-model_growth.rate.av<-aov(model_growth.rate)
 
-summary(model_growth.rate.av)
 summary(model_case.proportion)
 summary(model_growth.rate)
 
@@ -303,7 +301,7 @@ summary(model_growth.rate)
 
 We find that the model which measures case proportion in August as an outcome finds restaurant closures to be significant at the $\alpha=0.5$ level. This first model also finds testing to have a statistically significant association with case proportions five months later, at the $\alpha=0.10$ level.
 
-For the second model, we find that testing has a statistically significant association with the difference in log of cumulative cases between August 31 and April 1st, at the $\alpha=0.01$ significance level.
+For the second model, we find that testing has a statistically significant association with the log of cumulative case growth rate between August 31 and April 1st, at the $\alpha=0.01$ significance level.
 
 In the final project, we can use Tukey's Honestly Significantly Difference test to construct pairwise confidence intervals for the different groups.
 
