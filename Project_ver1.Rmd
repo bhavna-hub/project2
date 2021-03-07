@@ -37,7 +37,11 @@ library(tidyverse)
 library(readxl)
 library(dplyr)
 library(ggplot2)
+library(stats)
 library(reshape2)
+library(growthcurver)
+library(stringr)
+library(anytime)
 ```
 
 
@@ -45,6 +49,68 @@ library(reshape2)
 covid <- read_csv("https://covid19.who.int/WHO-COVID-19-global-data.csv")
 
 policy <- read_excel("Data/Gov_Responses2Covid19_last.xlsx")
+
+
+### CHANGE DATES IN POLICY TO PROPER FORMAT ###
+for (x in 1:nrow(policy)) {
+  if (nchar(policy$d[x])==9) {
+    policy$d[x]=as.character(anydate(policy$d[x]))
+  }
+  else {
+    policy$d[x]=as.character(as.Date(as.numeric(policy$d[x]), origin="1899-12-30"))
+  }
+}
+policy$d<-as.Date(policy$d)
+##############################################################################################################
+### CREATE DF WHICH TRACKS CUMULATIVE CASES OVER FIRST 200 DAYS SINCE FIRST RECORDED CASE FOR EACH COUNTRY ###
+dat.200days<-data.frame(days<-(0:200))
+
+
+for (x in 1:nrow(covid)) {
+  
+  if (covid$Cumulative_cases[x]!=0 && covid$Cumulative_cases[x-1]==0 & covid$Cumulative_cases[x+100]>4000) {
+    country<-covid$Country_code[x]
+    date<-covid$Date_reported[(x+0):(x+200)]
+    cases<-covid$Cumulative_cases[(x+0):(x+200)]
+    dat.200days[,paste0(country)]<-cases
+    dat.200days[,paste0(country, ' date')]<-covid$Date_reported[(x+0):(x+200)]
+    
+    try<-subset(policy, policy$d %in% as.character(covid$Date_reported[(x+0):(x+200)]))
+  }
+  
+}
+dat.200days
+###Thus r is the maximum theoretical rate of increase of a population per individual – that is, the maximum population growth rate. The concept is commonly used in insect population ecology or management to determine how environmental factors affect the rate at which pest populations increase. See also exponential population growth and logistic population growth.[18]   https://en.wikipedia.org/wiki/Population_dynamics###
+
+
+### CREATE DF FOR GROWTH RATES BY COUNTRY ###
+covid.x<-(0:200)
+dat.growthrates<-data.frame(country=unique(names(dat.200days))[seq(2,length(dat.200days),2)], gr=0, days_testing=0, days_mask=0, days_lockdown=0, days_restaurant_close=0)
+n<-length(names(dat.200days))
+for (x in seq(2,n,2)) {
+
+
+ 
+ if (str_sub(country.name[x], start=-4)!='date') {
+  gc_fit<-SummarizeGrowth(covid.x,dat.200days[,x])
+ 
+  dat.growthrates$gr[x/2]<-gc_fit$vals[7]
+  dat.growthrates$days_testing[x/2]<-sum(policy$testing[policy$d >= dat.200days[1,x+1] & policy$d <= dat.200days[201,x+1] & policy$geoid==names(dat.200days)[x]])
+  dat.growthrates$days_mask[x/2]<-sum(policy$masks[policy$d >= dat.200days[1,x+1] & policy$d <= dat.200days[201,x+1] & policy$geoid==names(dat.200days)[x]])
+  dat.growthrates$days_lockdown[x/2]<-sum(policy$domestic[policy$d >= dat.200days[1,x+1] & policy$d <= dat.200days[201,x+1] & policy$geoid==names(dat.200days)[x]])
+  dat.growthrates$days_restaurant_close[x/2]<-sum(policy$rest[policy$d >= dat.200days[1,x+1] & policy$d <= dat.200days[201,x+1] &policy$geoid==names(dat.200days)[x]])
+ }
+}
+### OMIT CHINA OUTLIER ###################################################################################
+test.data<-dat.growthrates[-c(17),]
+
+#############################################################################################################
+### OBTAIN LOGISTIC GROWTH FOR ANY COUNTRY ###
+gc_fit<-SummarizeGrowth(covid.x,dat.200days[,"US"])
+gc_fit
+plot(gc_fit)
+
+
 ```
 
 ```{r}
@@ -52,16 +118,8 @@ by_country <- policy %>%
   group_by(country)
 
 policy2 <- by_country %>%
-  subset(d=='31aug2020' | d=='01apr2020')
+  subset(d=='2020-08-31' | d=='2020-04-01')
 
-for (x in 1:nrow(policy2)) {
-  if (policy2$d[x]=='31aug2020') {
-    policy2$d[x]<-'2020-08-31' 
-  }
-  else {
-    policy2$d[x]<-'2020-4-01'
-  }
-} 
 
 covid2 <- covid %>%
   subset(Date_reported=='2020-08-31' | Date_reported=='2020-04-01') 
@@ -117,6 +175,7 @@ summary(df$deaths)
 
 ```{r}
 summary(df$Case_mort)
+df.growthrates
 ```
 
 
@@ -156,7 +215,7 @@ df.augresult.nm<-subset(df.growthrates, df$country %in% df.nomaskapril$country &
 
 boxplot(df.augresult$growth2, df.augresult.nm$growth2,
         names=c('Mask policy in April', 'No mask policy in April'),
-        ylim=c(0, 10),
+        ylim=c(-1, 10),
         main='Cumulative case growth rate from Apr to Aug based on Apr 1st mask policy')
 ```
 
@@ -292,7 +351,9 @@ model_growth.rate<-lm(data=df.growthrates, formula=growth2[which(date=='2020-04-
             masks[which(date=='2020-04-01')]+testing[which(date=='2020-04-01')]+
             domestic[which(date=='2020-04-01')]+rest[which(date=='2020-04-01')])
 
-
+model_growth.rate.logistic<-lm(data=test.data, formula=unlist(gr)~days_testing+days_mask+days_restaurant_close+days_lockdown)
+plot(model_growth.rate.logistic)
+summary(model_growth.rate.logistic)
 summary(model_case.proportion)
 summary(model_growth.rate)
 
