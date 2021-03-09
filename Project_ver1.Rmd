@@ -32,7 +32,7 @@ Citation: Leffler, Christoper T, et al. “Association of Country-Wide Coronavir
 
 ## Decriptive Analysis
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning=FALSE)
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning=FALSE)
 library(tidyverse)
 library(readxl)
 library(dplyr)
@@ -79,7 +79,6 @@ for (x in 1:nrow(covid)) {
   }
   
 }
-dat.200days
 ###Thus r is the maximum theoretical rate of increase of a population per individual – that is, the maximum population growth rate. The concept is commonly used in insect population ecology or management to determine how environmental factors affect the rate at which pest populations increase. See also exponential population growth and logistic population growth.[18]   https://en.wikipedia.org/wiki/Population_dynamics###
 
 
@@ -87,10 +86,9 @@ dat.200days
 covid.x<-(0:200)
 dat.growthrates<-data.frame(country=unique(names(dat.200days))[seq(2,length(dat.200days),2)], gr=0, days_testing=0, days_mask=0, days_lockdown=0, days_restaurant_close=0)
 n<-length(names(dat.200days))
+country.name<-names(dat.200days)
 for (x in seq(2,n,2)) {
 
-
- 
  if (str_sub(country.name[x], start=-4)!='date') {
   gc_fit<-SummarizeGrowth(covid.x,dat.200days[,x])
  
@@ -103,13 +101,63 @@ for (x in seq(2,n,2)) {
 }
 ### OMIT CHINA OUTLIER ###################################################################################
 test.data<-dat.growthrates[-c(17),]
+```
 
+A good way of measuring the spread of COVID-19 across a range of time is through logistic growth modeling (insert citation of study). Logistic growth is commonly used in fields like biology and ecology to model the growth of populations in an environment. The logistic growth equation used here (from the R package "growthcurver") takes the form of:
+
+$$N_t = \frac{K}{1 + \left( \frac{K-N_0}{N_0} \right) e^{-rt}} $$
+Where $N_t$ describes the number of cumulative cases at time $t$. The parameter $K$ is the theoretical maximum possible population size, which in this context describes the theoretical carrying capacity of COVID-19 cases in a given country. The parameter $N_0$ is the theoretical number of cumulative cases on day 0 for the fitted growth curve. Lastly, the parameter $r$ is known as the intrinsic growth rate. It can be thought of as the maximum theoretical rate of increase of the number of cases per individual. That is to say, r represents the growth rate which would be observed were there to be no natural limitations imposed on the carrying capacity of COVID-19 cases in a given country. The R package "growthcurver" finds optimal values of $K$, $r$, and $N_0$ in order to find a nonlinear line of best fit. We can see some fitted logistic growth curves for some countries below. 
+
+
+``` {r}
 #############################################################################################################
 ### OBTAIN LOGISTIC GROWTH FOR ANY COUNTRY ###
-gc_fit<-SummarizeGrowth(covid.x,dat.200days[,"US"])
-gc_fit
-plot(gc_fit)
 
+gc_fit<-SummarizeGrowth(covid.x,dat.200days[,"US"])
+plot(gc_fit, lwd=3, main='United States First 200 Days')
+
+gc_fit2<-SummarizeGrowth(covid.x,dat.200days[,'AZ'])
+plot(gc_fit2, lwd=3, main='Azerbaijan First 200 Days')
+
+gc_fit3<-SummarizeGrowth(covid.x,dat.200days[,'BO'])
+plot(gc_fit3, lwd=3, main='Bolivia First 200 Days')
+
+gc_fit4<-gc_fit3<-SummarizeGrowth(covid.x,dat.200days[,'PH'])
+plot(gc_fit3, lwd=3, main='Philippines First 200 Days')
+```
+
+
+```{r}
+### OBTAIN HISTOGRAM OF NUMBER OF DAYS WITH MASK POLICY ###
+
+
+hist(dat.growthrates$days_mask, main='Histogram of Days with Mask Mandate by Country (First 200 Days)',
+     xlab='Days with Mask Mandate', ylab='Number of Countries')
+
+
+
+```
+
+```{r}
+### BOXPLOTS ###
+
+to.plot.lessmasks<-dat.growthrates$gr[which(dat.growthrates$days_mask<100)]
+
+to.plot.moremasks<-dat.growthrates$gr[which(dat.growthrates$days_mask>=100)]
+
+boxplot(unlist(to.plot.lessmasks),
+        unlist(to.plot.moremasks),
+        names=c('Less than 100 Days of Mask Mandate', 'More than 100 Days'),
+        main='200 Day Logistic Growth Rate by Days of Mask Mandate')
+
+to.plot.lesslockdown<-dat.growthrates$gr[which(dat.growthrates$days_lockdown<100)]
+
+to.plot.morelockdown<-dat.growthrates$gr[which(dat.growthrates$days_lockdown>=100)]
+
+boxplot(unlist(to.plot.lesslockdown),
+        unlist(to.plot.morelockdown),
+        names=c('Less than 100 Days of Lockdown', 'More than 100 Days'),
+        main='200 Day Logistic Growth Rate by Days of Lockdown')
 
 ```
 
@@ -146,7 +194,6 @@ df$Case_mort = df$Cumulative_deaths/df$Cumulative_cases
 ```
 
 ```{r}
-glimpse(df)
 ```
 
 #summary statistics
@@ -175,7 +222,7 @@ summary(df$deaths)
 
 ```{r}
 summary(df$Case_mort)
-df.growthrates
+
 ```
 
 
@@ -351,7 +398,7 @@ model_growth.rate<-lm(data=df.growthrates, formula=growth2[which(date=='2020-04-
             masks[which(date=='2020-04-01')]+testing[which(date=='2020-04-01')]+
             domestic[which(date=='2020-04-01')]+rest[which(date=='2020-04-01')])
 
-model_growth.rate.logistic<-lm(data=test.data, formula=unlist(gr)~days_testing+days_mask+days_restaurant_close+days_lockdown)
+model_growth.rate.logistic<-lm(data=test.data,formula=unlist(gr)~days_testing+days_mask+days_restaurant_close+days_lockdown)
 plot(model_growth.rate.logistic)
 summary(model_growth.rate.logistic)
 summary(model_case.proportion)
