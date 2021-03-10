@@ -7,6 +7,7 @@ output: html_document
 ## Abstract
 
 ## Introduction
+
 Our main question of interest for this exploratory data analysis is whether or not there is a difference in the new case proportion growth rate between April and August amongst countries in the “Americas” region (per WHO classification) that had implemented a mask mandate, testing, and/or lockdown policy by April 1st, 2020 versus those that didn’t implement all or part of these policies by that time. If a difference is apparent, a follow-up question would be whether or not countries with a mask mandate in place had lower proportions of new cases when compared to countries that did not implement all or part of such measures until after April 1st, 2020.
 
 The results of this data analysis could better inform us on the effectiveness of mask and testing policy in stemming the spread of COVID-19. In turn, this information could have significant public policy implications as countries decide whether or not to implement mask mandates and introduce more widespread testing to combat the COVID-19 pandemic. The results of this analysis can be used to build political and public support either for or against these measures based on its results. Additionally, if such policies are shown to be effective in stemming the spread of COVID-19, this analysis would allow researchers to better forecast the impact of COVID-19 on countries based on whether or not they had implemented the mentioned policies by April 1st, 2020.
@@ -75,7 +76,7 @@ for (x in 1:nrow(covid)) {
     dat.200days[,paste0(country)]<-cases
     dat.200days[,paste0(country, ' date')]<-covid$Date_reported[(x+0):(x+200)]
     
-    try<-subset(policy, policy$d %in% as.character(covid$Date_reported[(x+0):(x+200)]))
+    #try<-subset(policy, policy$d %in% as.character(covid$Date_reported[(x+0):(x+200)]))
   }
   
 }
@@ -127,16 +128,50 @@ plot(gc_fit3, lwd=3, main='Philippines First 200 Days')
 ```
 
 
+We can also observe the parameters which the growthcurver package fits to each country. For Denmark, for example, we obtain the parameters shown in the output below. Note that r, intrinsic growth rate, is reported as 0.087. This implies that the theoretical maximum rate of spread of COVID-19 in Denmark over the initial 200 day period was 0.087. Each person in the country would be expected to spread the disease to 0.087 other people during the height of contagion.  
+```{r}
+gc_fit5<-SummarizeGrowth(covid.x,dat.200days[,'DE'])
+gc_fit5
+```
+
+
+Visualizing a histogram of the number of days in which a mask mandate was in place may also shed insight into how different countries chose to respond to the initial onset of the virus. From the histogram, we observe that although the majority of countries implemented mask mandates for more than 100 days of the initial 200 day period, there were still a handful of countries which implemented very few days of mask mandates and/or none at all. 
+
+
 ```{r}
 ### OBTAIN HISTOGRAM OF NUMBER OF DAYS WITH MASK POLICY ###
 
 
 hist(dat.growthrates$days_mask, main='Histogram of Days with Mask Mandate by Country (First 200 Days)',
      xlab='Days with Mask Mandate', ylab='Number of Countries')
+```
 
+
+From the scatterplot of 200 Day Growth rate below, we can see that China may be an outlier which could skew the results of the model. It may be worth considering omitting China from the model for this reason. Although China was effective at containing the spread of the virus after just 100 days, its initial growth rate was very high, which likely resulted in the high observed growth rate.
+
+
+```{r}
+### SCATTERPLOTS ###
+
+ggplot(data=dat.growthrates, aes(x=as.numeric(days_mask), y=as.numeric(gr),label=country)) + geom_point() + scale_x_discrete() + geom_text(aes(label=ifelse(gr>.08,country,'')), size=3,hjust=0,vjust=0,color='blue') + xlab('Days With Mask Policy') +
+ylab('200 Day Growth Rate') + ggtitle('200 Day Growth Rate Based on Days with Mask Policy') + xlim(0,200)
 
 
 ```
+
+
+If we consider China's logistic growth curve, we can see why it possesses such a high r value. The rate of initial spread was very high, but it levelled off quickly after containment measures were implemented.
+
+
+```{r}
+gc_fit6<-gc_fit3<-SummarizeGrowth(covid.x,dat.200days[,'CN'])
+plot(gc_fit6, lwd=3, main='China First 200 Days')
+
+```
+
+
+Here we obtain boxplots of the 200 day logistic growth rate recorded for countries which implemented less than 100 days of certain policy measures and more than 100 days of certain policy measures within the 200 day time period. 
+
 
 ```{r}
 ### BOXPLOTS ###
@@ -147,7 +182,7 @@ to.plot.moremasks<-dat.growthrates$gr[which(dat.growthrates$days_mask>=100)]
 
 boxplot(unlist(to.plot.lessmasks),
         unlist(to.plot.moremasks),
-        names=c('Less than 100 Days of Mask Mandate', 'More than 100 Days'),
+        names=c('Less than 100 Days of Masks (n=19)', 'More than 100 Days (n=66)'),
         main='200 Day Logistic Growth Rate by Days of Mask Mandate')
 
 to.plot.lesslockdown<-dat.growthrates$gr[which(dat.growthrates$days_lockdown<100)]
@@ -156,9 +191,8 @@ to.plot.morelockdown<-dat.growthrates$gr[which(dat.growthrates$days_lockdown>=10
 
 boxplot(unlist(to.plot.lesslockdown),
         unlist(to.plot.morelockdown),
-        names=c('Less than 100 Days of Lockdown', 'More than 100 Days'),
+        names=c('Less than 100 Days of Lockdown (n=65)', 'More than 100 Days (n=20)'),
         main='200 Day Logistic Growth Rate by Days of Lockdown')
-
 ```
 
 ```{r}
@@ -181,9 +215,8 @@ df<-merge(x=policy2, y=covid2, by.x=c("geoid", "date"), by.y=c("Country_code", "
 df<-df %>%
   mutate(case_proportion=(Cumulative_cases/as.numeric(population_2019))) 
 
-
-
 ```
+
 
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
 
@@ -191,9 +224,6 @@ Note that the `echo = FALSE` parameter was added to the code chunk to prevent pr
 Adding case mortality column
 ```{r}
 df$Case_mort = df$Cumulative_deaths/df$Cumulative_cases
-```
-
-```{r}
 ```
 
 #summary statistics
@@ -244,166 +274,79 @@ nan.index<-is.nan(df$growth2)
 df.growthrates<-df[!na.index & !inf.index & !nan.index,]
 ```
 
-```{r}
-### GENERATE BOXPLOT FOR COUNTRIES WHICH HAD MASK POLICY IN APRIL VERSUS NO MASK POLICY IN APRIL ###
-
-df.maskapril<-subset(df.growthrates, masks==1 & date=='2020-04-01')
-
-df.augresult<-subset(df.growthrates, df$country %in% df.maskapril$country & date=='2020-04-01')
-
-#mask.result<-summary(df.augresult$case_proportion)
-
-
-df.nomaskapril<-subset(df.growthrates, masks==0 & date=='2020-04-01')
-
-df.augresult.nm<-subset(df.growthrates, df$country %in% df.nomaskapril$country & date=='2020-04-01')
-
-#nomask.result<-summary(df.augresult.nm$case_proportion)
-
-boxplot(df.augresult$growth2, df.augresult.nm$growth2,
-        names=c('Mask policy in April', 'No mask policy in April'),
-        ylim=c(-1, 10),
-        main='Cumulative case growth rate from Apr to Aug based on Apr 1st mask policy')
-```
-
-```{r, message=FALSE}
-### GENERATE BOXPLOT FOR COUNTRIES WHICH HAD TESTING POLICY IN APRIL VERSUS ###
-### NO TESTING POLICY IN APRIL ###
-
-df.test.april<-subset(df.growthrates, testing==1 & date=='2020-04-01')
-
-df.augresult.test<-subset(df.growthrates, df$country %in% df.test.april$country & date=='2020-04-01')
-
-#test.result<-summary(df.augresult.test$case_proportion)
-
-
-df.notest.april<-subset(df.growthrates, testing==0 & date=='2020-04-01')
-
-df.augresult.notest<-subset(df.growthrates, df$country %in% df.notest.april$country & date=='2020-04-01')
-
-#nomass.result<-summary(df.augresult.notest$case_proportion)
-
-boxplot(df.augresult.test$growth2, df.augresult.notest$growth2,
-        names=c('Testing Policy in April', 'No Testing Policy in April'),
-        ylim=c(0, 10),
-        main='Cumulative case growth rate from Apr to Aug based on Apr 1st testing policy')
-```
-
-```{r}
-### GENERATE BOXPLOT FOR COUNTRIES WHICH HAD LOCKDOWN POLICY IN APRIL VERSUS ###
-### NO LOCKDOWN POLICY IN APRIL ###
-
-df.ld.april<-subset(df.growthrates, domestic==1 & date=='2020-04-01')
-
-df.augresult.ld<-subset(df.growthrates, df$country %in% df.ld.april$country & date=='2020-04-01')
-
-#ld.result<-summary(df.augresult.ld$case_proportion)
-
-
-df.nold.april<-subset(df.growthrates, domestic==0 & date=='2020-04-01')
-
-df.augresult.nold<-subset(df.growthrates, df$country %in% df.nold.april$country & date=='2020-04-01')
-
-#nold.result<-summary(df.augresult.nold$case_proportion)
-
-boxplot(df.augresult.ld$growth2, df.augresult.nold$growth2,
-        names=c('Lockdown Policy in April', 'No Lockdown Policy in April'),
-        ylim=c(0,10),
-        main='Cumulative case growth rate from Apr to Aug based on Apr 1st lockdown policy')
-
-```
-
-```{r}
-### GENERATE BOXPLOT FOR COUNTRIES WHICH HAD RESTURANT POLICY IN APRIL VERSUS ###
-### NO LOCKDOWN POLICY IN APRIL ###
-
-df.ld.april<-subset(df.growthrates, rest==1 & date=='2020-04-01')
-
-df.augresult.ld<-subset(df.growthrates, df$country %in% df.ld.april$country & date=='2020-04-01')
-
-ld.result<-summary(df.augresult.ld$case_proportion)
-
-
-df.nold.april<-subset(df.growthrates, rest==0 & date=='2020-04-01')
-
-df.augresult.nold<-subset(df.growthrates, df$country %in% df.nold.april$country & date=='2020-04-01')
-
-nold.result<-summary(df.augresult.nold$case_proportion)
-
-boxplot(df.augresult.ld$growth2, df.augresult.nold$growth2,
-        names=c('Restaurant Closures in April', 'No Rest. Closures in April'),
-        ylim=c(0,10),
-        main='Cumulative case growth rate from Apr to Aug based on Apr 1st lockdown policy')
-
-```
-
-
 
 ## Inferential Analysis
-Our primary question of interest is whether certain policies enacted at the national and sub-national level may be associated with different outcomes in terms of the cumulative case proportion and growth of cumulative cases a country experiences over a five month period. The policies we have examined include mask wearing obligations, testing implementation, lockdown enforcement, and restaurant closures. These policies were measured according to their implementation on April 1st of 2020. If the policy had been implemented at the national or local level by that date, then the variable takes a variable of one. If the policy had not been implemented, it takes a value of zero. 
+Our primary question of interest is whether certain policies enacted at the national and sub-national level may be associated with different outcomes in the 200 day growth rate of the disease as measured by a fitted logistic growth curve. The policies we have examined include mask wearing obligations, testing implementation, lockdown enforcement, and restaurant closures.  In the Oxford dataset, which tracks daily covid cases as well as daily policy implementations through the use of indicator variables, we obtained the sum of days in which policy measures were in place over the 200 day period. Each policy indicator variable took a value of 1 if the given policy was implemented at the national or sub-national (local) level on that day, and 0 if the policy was not enacted at both the national and sub-national level. The 200 day period is defined here with day 1 being the date on which the first case was recorded in the given country. This was done so as to ensure that measurement of growth rate was consistent for all countries in question. Although we should note that this approach fails to take into account other relevant factors, such as seasonal climate and population density. 
 
-It is important to emphasize that the goal of this model is not to assess causality, but to determine what factors are associated with certain outcomes.
 
-A secondary question of interest then entails which of these different policies, if any, are associated with country wide case proportions measured five months later on August 31, as well as the average growth rate of cases during that same five month interval. 
+The dataset which is implemented in the model contains 85 observations. In order to increase the reliability of the model, we decided to only take into account countries which recorded at least 4000 cases by the 100th day after initial infection. We found that countries below this threshold tended to report more inaccurate or misleading numbers, or numbers which were inconsistent enough (i.e. large jumps or gaps in reported data) which caused fitted logistic growth curves to be unrepresentative of the actual spread of the disease. After doing this, we were left with 86 observations. We then omitted China from the final dataset, since it was identified earlier as being an outlier which could skew the results of the model. Although cases in China levelled off rapidly over just 100 days, its high initial rate of spread followed by its extremely high rate of diminishment caused it's $r$ parameter to be much higher than any other observed $r$ parameters in the dataset of 86 countries. 
 
-For the purposes of this study, case proportion is defined as $X_i/N_i$, where $X_i$ represents the cumulative cases recorded for the i-th country on August 31 of 2020, and $N_i$ corresponds to that country's population in 2019. Cumulative case growth rate is defined as $((X_{i,{t+1}})-(X_{i,t}))/(X_{i,t})$ where $X_{i,{t+1}}$ corresponds to the number of cumulative cases recorded within the i-th country on August 31st, and $X_{i,t}$ corresponds to the number of cumulative cases recorded in the i-th country on April 1st.
+
+It is important to emphasize that the goal of this model is not to assess causality, but to determine what policy measures, if any, are associated with different outcomes in terms of the country's 200 day logistic growth rate, $r$. 
+
+
+A secondary question of interest then entails which of these different policies, if any, are associated with COVID-19 logistic growth rates measured over the 200 day interval. 
+
+
+For the purposes of answering these questions, we employed regression analysis. The outcome variable $Y_i$ is defined as the 200 day logistic growth rate $r$ as determined by a fitted logistic growth curve with the R package 'growthcurver'. The package determines the optimal parameters $K$, $r$, and $N_0$ (see the descriptive analysis section for explanation of these parameters) based on the logistic growth equation:
+$$N_t = \frac{K}{1 + \left( \frac{K-N_0}{N_0} \right) e^{-rt}} $$
+
+
+This equation is commonly used to model population growth of organisms in different environments.
+
 
 We first employ a linear regression model of the form:
 
-$$Y_{i,t+1}=\beta_0+\beta_1masks_{i,t}+\beta_2testing_{i,t}+\beta_3lockdown_{i,t}+\beta_4restaurants \space closed_{i,t} $$
+$$Y_{i}=\beta_0+\beta_1x_{1,i}+\beta_2x_{2,i}+\beta_3x_{3,i}+\beta_4x_{4,i} \quad \quad i=1,...,85$$
 
 
-Where each variable is a dummy which takes a value of 1 if the i-th country implemented the respective policy in time period $t$. The outcome is cumulative cases in the i-th country as recorded in time period $t+1$.
+Where each vector $x_{1,i},...,x_{4,i}$ is the number of days for which the mask, lockdown, testing, and restaurant closure policies were implemented for the i-th country over the 200 day time period. The outcome variable is the parameter $r$ for the i-th country as determined by that country's fitted logistic growth curve over the same 200 day time period. 
 
 
-The second linear regression model takes a similar form: 
+The linear regression model relies on several key assumptions. 
 
-$$Y_{i,t+1}=\beta_0+\beta_1masks_{i,t}+\beta_2testing_{i,t}+\beta_3lockdown_{i,t}+\beta_4restaurants \space closed_{i,t} $$
 
-except here the outcome is defined as the log of growth rate in cumulative cases between April 1st and August 31st.
+1) Linearity: The relationship between the response variable and the predictor variables is linear in parameters. This means that Y can be expressed as a linear combination of the parameters present in the model. 
 
-Both models, being linear regression models, rely on several key assumptions. 
+2) Homoskedasticity: Variance across the error terms is constant for every value of the response variable $Y$
 
-      1) the expected value of the response variable is influenced additively (if no interaction terms are              present) and linearly by the factors
+3) Errors are independent and identically distributed: In addition to the assumption of constant variance across residuals, residuals must follow the distribution $\epsilon$~$N(0, \sigma_\epsilon^2)$
 
-      2) Each sample is independent and selected from an underlying population which is normally distributed
+4) Variables are measured or observed reliably and without reporting error. 
 
-      3) Homogeneity of variance between groups (Homoskedasticity)
 
-      4) The error terms are normally distributed with constant mean and variance
-```{r}
-## Created a dataframe with just the country, growth rate in August, whether mask testing, lockdown in April
-
-# Can be used for anova model
-#masking_policy_april = subset(df, date =='2020-04-01')
-#august_results = subset(df, date == "2020-08-31")
-#df1 = data.frame( country =masking_policy_april$country, case_growth = august_results$case.growth, masks =masking_policy_april$masks,
-                 #lockdown =masking_policy_april$domestic,
-                 #testing =masking_policy_april$testing )
-```
 
 ```{r}
 
 
 ### Adam model ###
+#model_case.proportion<-glm(data=df, formula=case_proportion[which(date=='2020-08-31')]~
+  #          masks[which(date=='2020-04-01')]+testing[which(date=='2020-04-01')]+
+  #          domestic[which(date=='2020-04-01')]+rest[which(date=='2020-04-01')])
 
 
-
-model_case.proportion<-glm(data=df, formula=case_proportion[which(date=='2020-08-31')]~
-            masks[which(date=='2020-04-01')]+testing[which(date=='2020-04-01')]+
-            domestic[which(date=='2020-04-01')]+rest[which(date=='2020-04-01')])
-
-
-model_growth.rate<-lm(data=df.growthrates, formula=growth2[which(date=='2020-04-01')]~
-            masks[which(date=='2020-04-01')]+testing[which(date=='2020-04-01')]+
-            domestic[which(date=='2020-04-01')]+rest[which(date=='2020-04-01')])
+#model_growth.rate<lm(data=df.growthrates, formula=growth2[which(date=='2020-04-01')]~
+           # masks[which(date=='2020-04-01')]+testing[which(date=='2020-04-01')]+
+           # domestic[which(date=='2020-04-01')]+rest[which(date=='2020-04-01')])
 
 model_growth.rate.logistic<-lm(data=test.data,formula=unlist(gr)~days_testing+days_mask+days_restaurant_close+days_lockdown)
+model_growth.rate.logistic<-lm(data=test.data,formula=unlist(gr)~days_mask)
+summary(model_growth.rate.logistic)
 plot(model_growth.rate.logistic)
 summary(model_growth.rate.logistic)
-summary(model_case.proportion)
-summary(model_growth.rate)
 
+#summary(model_growth.rate)
+
+
+
+```
+
+
+
+```{r}
+###OTHER TESTS
+(confint(model_growth.rate.logistic, 'days_mask', level=0.95))
+(confint(model_growth.rate.logistic, 'days_restaurant_close', level=0.95))
 ```
 
 
@@ -416,61 +359,76 @@ In the final project, we can use Tukey's Honestly Significantly Difference test 
 ## Sensitivity Analysis
 
 ```{r}
-plot(model_case.proportion,which =1)
+hist(model_growth.rate.logistic$residuals)
 ```
 
+
 The residuals versus fitted plot shows the spread widening as the predicted values increases. This indicates that that the errors do not have equal variance. If the errors were normally distributed the errors would have be spread evenly and randomly around the 0 line. Observations 20,253 and 165 seems to have a high variance.
+
+
 ```{r}
-plot(model_case.proportion,which =2)
+#plot(model_case.proportion,which =2)
 ```
+
 
 The normal Q-Q plot shows that the errors have heavy tail on the right. Again observations 20,153,165 are contributing to the problem. The errors are not normally distributed.
 
+
 ```{r}
-plot(model_case.proportion,which =3)
+#plot(model_case.proportion,which =3)
 ```
 
+
 The scale location plot is also used to check the equal variance assumption. Again it is visible that the spread of variance increases as the predicted value increases. Also as expected observations 20, 153 and 165 are still outliers.
+
+
 ```{r}
-plot(model_case.proportion,which =4)
+#plot(model_case.proportion,which =4)
 ```
 
 
 The residuals versus Leverage plot shows that the spread of standardized residuals is decreasing indicating that the variances are unequal. There are no observations outside the red lines so that there are no highly influentail data points.
 
 Using an alternative model that looked at case growth rate in August as the response variable the we get the following sensitivity results for the model.
+
+
 ```{r}
 # New case growth rate model
-plot(model_growth.rate,which =1)
+#plot(model_growth.rate,which =1)
 ```
+
 
 The residuals versus fitted plot for case growth rate is evenly and randomly spread spread over the line y=0. The spread does get wider slightly around predicted value 4.0. But the errors do have equal variance. Observations 86 and 139 are high outliers. While 24 is low outlier.
 
+
 ```{r}
-plot(model_growth.rate,which =2)
+#plot(model_growth.rate,which =2)
 ```
     
 From the normal Q-Q plot the residuals have lighter tail on both ends. But it looks symmetrically lighter. And they do follow the line mostly. So the errors are normally distributed. The outliers 86,139 and 24 are pulling the distribution away from normal.
 
 ```{r}
-plot(model_growth.rate,which =3)
+#plot(model_growth.rate,which =3)
 ```
 
 The scale location plot shows that the red line is almost horizontal. The spread does get larger towards higher fitted values but it centered. We can back up the claim that the errors have equal variance. Observations 139 and 24 are noted as outliers.
 
 ```{r}
-plot(model_growth.rate,which =4)
+#plot(model_growth.rate,which =4)
 ```
 
 
 Cook's distance measures the influence certain observations have on distributions. The higher Cook's distance is the more influential the observation is. Observations 16,86,99 are noted have large Cook's distance.
 
+
 ```{r}
-  tmp =df.growthrates$growth2[which(df.growthrates$date=='2020-04-01')]
-mean(tmp)
-sd(tmp)
-tmp[86]
+  #tmp =df.growthrates$growth2[which(df.growthrates$date=='2020-04-01')]
+#mean(tmp)
+#sd(tmp)
+#tmp[86]
 ```
+
+
 So observation 86 had a case growth rate 2 standard deviations above the mean.
 
 ## Discussion & Conclusion ##
