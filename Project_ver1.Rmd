@@ -69,7 +69,7 @@ dat.200days<-data.frame(days<-(0:200))
 
 for (x in 1:nrow(covid)) {
   
-  if (covid$Cumulative_cases[x]!=0 && covid$Cumulative_cases[x-1]==0 & covid$Cumulative_cases[x+100]>4000) {
+  if (covid$Cumulative_cases[x]!=0 && covid$Cumulative_cases[x-1]==0 & covid$Cumulative_cases[x+100]>800) {
     country<-covid$Country_code[x]
     date<-covid$Date_reported[(x+0):(x+200)]
     cases<-covid$Cumulative_cases[(x+0):(x+200)]
@@ -156,7 +156,8 @@ From the scatterplot of 200 Day Growth rate below, we can see that China may be 
 ggplot(data=dat.growthrates, aes(x=as.numeric(days_mask), y=as.numeric(gr),label=country)) + geom_point() + scale_x_discrete() + geom_text(aes(label=ifelse(gr>.08,country,'')), size=3,hjust=0,vjust=0,color='blue') + xlab('Days With Mask Policy') +
 ylab('200 Day Growth Rate') + ggtitle('200 Day Growth Rate Based on Days with Mask Policy') + xlim(0,200)
 
-
+ggplot(data=dat.growthrates, aes(x=as.numeric(days_lockdown), y=as.numeric(gr),label=country)) + geom_point() + scale_x_discrete() + geom_text(aes(label=ifelse(gr>.08,country,'')), size=3,hjust=0,vjust=0,color='blue') + xlab('Days With Lockdown Policy') +
+ylab('200 Day Growth Rate') + ggtitle('200 Day Growth Rate Based on Days with Lockdown Policy') + xlim(0,200)
 ```
 
 
@@ -276,10 +277,10 @@ df.growthrates<-df[!na.index & !inf.index & !nan.index,]
 
 
 ## Inferential Analysis
-Our primary question of interest is whether certain policies enacted at the national and sub-national level may be associated with different outcomes in the 200 day growth rate of the disease as measured by a fitted logistic growth curve. The policies we have examined include mask wearing obligations, testing implementation, lockdown enforcement, and restaurant closures.  In the Oxford dataset, which tracks daily covid cases as well as daily policy implementations through the use of indicator variables, we obtained the sum of days in which policy measures were in place over the 200 day period. Each policy indicator variable took a value of 1 if the given policy was implemented at the national or sub-national (local) level on that day, and 0 if the policy was not enacted at both the national and sub-national level. The 200 day period is defined here with day 1 being the date on which the first case was recorded in the given country. This was done so as to ensure that measurement of growth rate was consistent for all countries in question. Although we should note that this approach fails to take into account other relevant factors, such as seasonal climate and population density. 
+Our primary question of interest is whether certain policies enacted at the national and sub-national level may be associated with different outcomes in the 200 day growth rate of the disease as measured by a fitted logistic growth curve. The policies we have examined include mask wearing obligations, testing implementation, lockdown enforcement, and restaurant closures.  In the Oxford dataset, which tracks daily covid cases as well as daily policy implementations through the use of indicator variables, we obtained the sum of days in which policy measures were in place over the 200 day period. Each policy indicator variable took a value of 1 if the given policy was implemented at the national or sub-national level on that day, and 0 if the policy was not enacted at both the national and sub-national level. The 200 day period is defined here with day 1 being the date on which the first case was recorded in the given country. This was done so as to ensure that measurement of growth rate was consistent for all countries in question. Although we should note that this approach fails to take into account other relevant factors, such as seasonal climate and population density. 
 
 
-The dataset which is implemented in the model contains 85 observations. In order to increase the reliability of the model, we decided to only take into account countries which recorded at least 4000 cases by the 100th day after initial infection. We found that countries below this threshold tended to report more inaccurate or misleading numbers, or numbers which were inconsistent enough (i.e. large jumps or gaps in reported data) which caused fitted logistic growth curves to be unrepresentative of the actual spread of the disease. After doing this, we were left with 86 observations. We then omitted China from the final dataset, since it was identified earlier as being an outlier which could skew the results of the model. Although cases in China levelled off rapidly over just 100 days, its high initial rate of spread followed by its extremely high rate of diminishment caused it's $r$ parameter to be much higher than any other observed $r$ parameters in the dataset of 86 countries. 
+The dataset which is implemented in the model contains 85 observations. In order to increase the reliability of the model, we decided to only take into account countries which recorded at least 800 cases by the 100th day after initial infection. We found that countries below this threshold tended to report more inaccurate, or numbers which were inconsistent enough (i.e. large jumps or gaps in reported data) which caused fitted logistic growth curves to be unrepresentative of the actual spread of the disease. After doing this, we were left with 138 observations (countries).
 
 
 It is important to emphasize that the goal of this model is not to assess causality, but to determine what policy measures, if any, are associated with different outcomes in terms of the country's 200 day logistic growth rate, $r$. 
@@ -297,7 +298,7 @@ This equation is commonly used to model population growth of organisms in differ
 
 We first employ a linear regression model of the form:
 
-$$Y_{i}=\beta_0+\beta_1x_{1,i}+\beta_2x_{2,i}+\beta_3x_{3,i}+\beta_4x_{4,i} \quad \quad i=1,...,85$$
+$$Y_{i}=\beta_0+\beta_1x_{1,i}+\beta_2x_{2,i}+\beta_3x_{3,i}+\beta_4x_{4,i} \quad \quad i=1,...,138$$
 
 
 Where each vector $x_{1,i},...,x_{4,i}$ is the number of days for which the mask, lockdown, testing, and restaurant closure policies were implemented for the i-th country over the 200 day time period. The outcome variable is the parameter $r$ for the i-th country as determined by that country's fitted logistic growth curve over the same 200 day time period. 
@@ -329,8 +330,8 @@ The linear regression model relies on several key assumptions.
            # masks[which(date=='2020-04-01')]+testing[which(date=='2020-04-01')]+
            # domestic[which(date=='2020-04-01')]+rest[which(date=='2020-04-01')])
 
-model_growth.rate.logistic<-lm(data=test.data,formula=unlist(gr)~days_testing+days_mask+days_restaurant_close+days_lockdown)
-model_growth.rate.logistic<-lm(data=test.data,formula=unlist(gr)~days_mask)
+model_growth.rate.logistic<-lm(data=dat.growthrates,formula=unlist(gr)~days_testing+days_mask+days_restaurant_close+days_lockdown)
+model_growth.rate.logistic<-lm(data=dat.growthrates,formula=unlist(gr)~days_mask)
 summary(model_growth.rate.logistic)
 plot(model_growth.rate.logistic)
 summary(model_growth.rate.logistic)
@@ -357,7 +358,7 @@ For the second model, we find that testing has a statistically significant assoc
 In the final project, we can use Tukey's Honestly Significantly Difference test to construct pairwise confidence intervals for the different groups.
 
 ## Sensitivity Analysis
-
+Note the outliers
 ```{r}
 hist(model_growth.rate.logistic$residuals)
 ```
