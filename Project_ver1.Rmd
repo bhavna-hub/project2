@@ -317,9 +317,24 @@ model_growth.rate.logistic1<-lm(data=dat.growthrates, formula=unlist(gr)~days_ma
 model_growth.rate.logistic2<-lm(data=dat.growthrates,formula=unlist(gr)~days_mask)
 summary(model_growth.rate.logistic1)
 
+coeff<-coefficients(model_growth.rate.logistic1)
+na.index<-is.na(dat.growthrates$days_mask)
+na.index2<-is.na(dat.growthrates$days_lockdown)
+
+predicted_df<-data.frame(growth_pred=predict(model_growth.rate.logistic1), days_mask=dat.growthrates$days_mask[!na.index & !na.index2])
 
 
+ggplot(data=dat.growthrates, aes(x=as.numeric(days_mask), y=as.numeric(gr),label=country)) + geom_point() + scale_x_discrete() + geom_text(aes(label=ifelse(gr>.07,country,'')), size=3,hjust=0,vjust=0,color='blue') + xlab('Days With Mask Policy') +
+ylab('200 Day Growth Rate') + ggtitle('200 Day Growth Rate Based on Days with Mask Policy') + xlim(0,200) +
+geom_line(color='red', data=predicted_df, aes(x=as.numeric(days_mask),y=growth_pred), w='50') +
+labs(title = paste("Adj R2 = ",signif(summary(model_growth.rate.logistic1)$adj.r.squared, 5)))
 
+ggplot(data=dat.growthrates, aes(x=as.numeric(days_lockdown), y=as.numeric(gr),label=country)) + geom_point() + scale_x_discrete() + geom_text(aes(label=ifelse(gr>.07,country,'')), size=3,hjust=0,vjust=0,color='blue') + xlab('Days With Lockdown Policy') +
+ylab('200 Day Growth Rate') + ggtitle('200 Day Growth Rate Based on Days with Lockdown Policy') + xlim(0,200) +
+geom_line(color='red', data=predicted_df, aes(x=as.numeric(days_mask),y=growth_pred), w='50') +
+labs(title = paste("Adj R2 = ",signif(summary(model_growth.rate.logistic1)$adj.r.squared, 5)))
+
+length(dat.growthrates$days_mask[!na.index])
 
 ```
 
