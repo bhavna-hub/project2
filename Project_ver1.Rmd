@@ -387,29 +387,28 @@ plot(model_growth.rate.logistic1,which =4)
 ```
 
 
-Cook's distance measures the influence certain observations have on distributions. The higher Cook's distance is the more influential the observation is. Observations 40 and 86 have a high influence on the model.
+Cook's distance measures the influence certain observations have on distributions. The higher Cook's distance is the more influential the observation is. Observations 26, 59, and 91 have a high influence on the model.
 
-Now we look at the assumptions for the logistical growth model with days masking as the covariate.
 
-```{r}
-plot(model_growth.rate.logistic2, which = 1)
-```
-From the fitted versus residual plot the error look random and centered around 0.The red line mostly horizontal. This meas that model is linear. At around a fitted value of 0.06 the spread increases. The model does have equal variance.
 
 ```{r}
-plot(model_growth.rate.logistic2, which = 2)
-```
-The normal Q-Q plot says that the residuals do follow a normal distribution albeit with a heavier right tail. The observations mostly follow the line but there iare three very high observations. Namely 126,91 and 26.
+#plot(model_growth.rate.logistic2, which = 1)
+
 
 ```{r}
-plot(model_growth.rate.logistic2, which = 3)
+#plot(model_growth.rate.logistic2, which = 2)
 ```
-The scale location plot backs up the verification of homoskedasticity. The line is almost horizontal. At a fitted value of 0.06 the spread does widen. The observations are mostly random.
+
 
 ```{r}
-plot(model_growth.rate.logistic2, which = 4)
+#plot(model_growth.rate.logistic2, which = 3)
 ```
-The Cook's distance plot shows that observations 26, 59 and 91 are highly influential in our model.
+
+
+```{r}
+#plot(model_growth.rate.logistic2, which = 4)
+```
+
 
 
 
