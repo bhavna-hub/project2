@@ -114,7 +114,7 @@ $$N_t = \frac{K}{1 + \left( \frac{K-N_0}{N_0} \right) e^{-rt}} $$
 Where $N_t$ describes the number of cumulative cases at time $t$. The parameter $K$ is the theoretical maximum possible population size, which in this context describes the theoretical carrying capacity of COVID-19 cases in a given country. The parameter $N_0$ is the theoretical number of cumulative cases on day 0 for the fitted growth curve. Lastly, the parameter $r$ is known as the intrinsic growth rate. It can be thought of as the maximum theoretical rate of increase of the number of cases per individual. That is to say, r represents the growth rate which would be observed were there to be no natural limitations imposed on the carrying capacity of COVID-19 cases in a given country. It represents the maximum theoretical per capita growth rate within the population. 
 
 
-![This image explains the reasoning behind using r as our outcome variable. You can see it controls the maximum slope, or maximum rate of growth, of the fitted logistic growth curve.](images/fit-eq1-1.png)
+![This image explains the reasoning behind using r as our outcome variable. You can see it controls the maximum slope, or maximum rate of growth, of the fitted logistic growth curve.](images/362630.image0.jpg)
 
 
 The R package "growthcurver" finds optimal values of $K$, $r$, and $N_0$ in order to find a nonlinear line of best fit. We can see some fitted logistic growth curves for some countries below. 
