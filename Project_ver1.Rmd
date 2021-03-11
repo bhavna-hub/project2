@@ -104,10 +104,20 @@ for (x in seq(2,n,2)) {
 test.data<-dat.growthrates[-c(26),]
 ```
 
+
+
+
+
 A good way of measuring the spread of COVID-19 across a range of time is through logistic growth modeling (insert citation of study). Logistic growth is commonly used in fields like biology and ecology to model the growth of populations in an environment. The logistic growth equation used here (from the R package "growthcurver") takes the form of:
 
 $$N_t = \frac{K}{1 + \left( \frac{K-N_0}{N_0} \right) e^{-rt}} $$
-Where $N_t$ describes the number of cumulative cases at time $t$. The parameter $K$ is the theoretical maximum possible population size, which in this context describes the theoretical carrying capacity of COVID-19 cases in a given country. The parameter $N_0$ is the theoretical number of cumulative cases on day 0 for the fitted growth curve. Lastly, the parameter $r$ is known as the intrinsic growth rate. It can be thought of as the maximum theoretical rate of increase of the number of cases per individual. That is to say, r represents the growth rate which would be observed were there to be no natural limitations imposed on the carrying capacity of COVID-19 cases in a given country. The R package "growthcurver" finds optimal values of $K$, $r$, and $N_0$ in order to find a nonlinear line of best fit. We can see some fitted logistic growth curves for some countries below. 
+Where $N_t$ describes the number of cumulative cases at time $t$. The parameter $K$ is the theoretical maximum possible population size, which in this context describes the theoretical carrying capacity of COVID-19 cases in a given country. The parameter $N_0$ is the theoretical number of cumulative cases on day 0 for the fitted growth curve. Lastly, the parameter $r$ is known as the intrinsic growth rate. It can be thought of as the maximum theoretical rate of increase of the number of cases per individual. That is to say, r represents the growth rate which would be observed were there to be no natural limitations imposed on the carrying capacity of COVID-19 cases in a given country. It represents the maximum theoretical per capita growth rate within the population. 
+
+
+![This image explains the reasoning behind using r as our outcome variable. You can see it controls the maximum slope, or maximum rate of growth, of the fitted logistic growth curve.](images/fit-eq1-1.png)
+
+
+The R package "growthcurver" finds optimal values of $K$, $r$, and $N_0$ in order to find a nonlinear line of best fit. We can see some fitted logistic growth curves for some countries below. 
 
 
 ``` {r}
@@ -115,16 +125,16 @@ Where $N_t$ describes the number of cumulative cases at time $t$. The parameter 
 ### OBTAIN LOGISTIC GROWTH FOR ANY COUNTRY ###
 
 gc_fit<-SummarizeGrowth(covid.x,dat.200days[,"US"])
-plot(gc_fit, lwd=3, main='United States First 200 Days')
+plot(gc_fit, lwd=3, main= paste("United States First 200 Days, r = ",gc_fit$vals[7]))
 
 gc_fit2<-SummarizeGrowth(covid.x,dat.200days[,'AZ'])
-plot(gc_fit2, lwd=3, main='Azerbaijan First 200 Days')
+plot(gc_fit2, lwd=3, main=paste("Azerbaijan First 200 Days, r = ",gc_fit2$vals[7]))
 
 gc_fit3<-SummarizeGrowth(covid.x,dat.200days[,'BO'])
-plot(gc_fit3, lwd=3, main='Bolivia First 200 Days')
+plot(gc_fit3, lwd=3, main=paste("Bolivia First 200 Days, r = ",gc_fit3$vals[7]))
 
 gc_fit4<-gc_fit3<-SummarizeGrowth(covid.x,dat.200days[,'PH'])
-plot(gc_fit3, lwd=3, main='Philippines First 200 Days')
+plot(gc_fit3, lwd=3, main=paste("Phillipines First 200 Days, r = ",gc_fit4$vals[7]))
 ```
 
 
@@ -334,7 +344,6 @@ ylab('200 Day Growth Rate') + ggtitle('200 Day Growth Rate Based on Days with Lo
 geom_line(color='red', data=predicted_df, aes(x=as.numeric(days_mask),y=growth_pred), size=1) +
 labs(title = paste("Adj R2 = ",signif(summary(model_growth.rate.logistic1)$adj.r.squared, 5)))
 
-length(dat.growthrates$days_mask[!na.index])
 
 ```
 
