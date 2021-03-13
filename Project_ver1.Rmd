@@ -62,6 +62,10 @@ for (x in 1:nrow(policy)) {
     policy$d[x]=as.character(as.Date(as.numeric(policy$d[x]), origin="1899-12-30"))
   }
 }
+
+```
+
+```{r}
 policy$d<-as.Date(policy$d)
 ##############################################################################################################
 ### CREATE DF WHICH TRACKS CUMULATIVE CASES OVER FIRST 200 DAYS SINCE FIRST RECORDED CASE FOR EACH COUNTRY ###
@@ -361,7 +365,6 @@ We find that the model which measures 200 day case growth rate finds mask polici
 
 
 ## Sensitivity Analysis
-First we will look at the assumptions for the model that looks at case growth rate with the following  covariates; masking, lockdown, testing and restaraunt closure policies enacted by April 1.
 
 ```{r}
 # New case growth rate model
@@ -370,6 +373,32 @@ plot(model_growth.rate.logistic1,which =1)
 
 
 The residuals versus fitted plot for case growth rate is evenly and randomly spread spread over the line y=0. The spread does get wider slightly around predicted value 4.0. But the errors do have equal variance. The model appears to be linear as well.
+
+```{r}
+dat.growthrates[26,]
+```
+```{r}
+gc_fit5<-SummarizeGrowth(covid.x,dat.200days[,'CN'])
+plot(gc_fit5, lwd=3, main=paste("China First 200 Days, r = ",gc_fit5$vals[7]))
+```
+```{r}
+dat.growthrates[59,]
+```
+
+```{r}
+gc_fit6<-SummarizeGrowth(covid.x,dat.200days[,'IS'])
+plot(gc_fit6, lwd=3, main=paste("Iceland First 200 Days, r = ",gc_fit6$vals[7]))
+```
+
+```{r}
+dat.growthrates[91,]
+```
+
+```{r}
+gc_fit7<-SummarizeGrowth(covid.x,dat.200days[,'NZ'])
+plot(gc_fit6, lwd=3, main=paste("New Zealand First 200 Days, r = ",gc_fit7$vals[7]))
+```
+
 
 ```{r}
 plot(model_growth.rate.logistic1,which =2)
@@ -396,7 +425,7 @@ Cook's distance measures the influence certain observations have on distribution
 #plot(model_growth.rate.logistic2, which = 1)
 
 
-```{r}
+{r}
 #plot(model_growth.rate.logistic2, which = 2)
 ```
 
