@@ -372,7 +372,7 @@ plot(model_growth.rate.logistic1,which =1)
 ```
 
 
-The residuals versus fitted plot for case growth rate is evenly and randomly spread spread over the line y=0. The spread does get wider slightly around predicted value 4.0. But the errors do have equal variance. The model appears to be linear as well.
+The residuals versus fitted plot for case growth rate is evenly and randomly spread spread over the line y=0. The spread widen slightly. And we have note the 3 outlier observations 64, 73 and 107. Overall based on this plot the model satisfies linearity and equal varaince of errors assumptions.
 
 ```{r}
 dat.growthrates[26,]
@@ -404,20 +404,19 @@ plot(gc_fit6, lwd=3, main=paste("New Zealand First 200 Days, r = ",gc_fit7$vals[
 plot(model_growth.rate.logistic1,which =2)
 ```
     
-From the normal Q-Q plot the residuals have slightly lighter tail on the right. But it looks very minimal. And they do follow the line mostly. So the errors are normally distributed. 
+The Q-Q plot shows the residuals have slightly lighter tail on the left.There are also three outliers creating a heavier tail on the right. They are the same observations we saw in fitted versus residual plot. Two out of three outliers are very close to the line as are the rest of the observations. So the errors are normally distributed. 
 
 ```{r}
-plot(model_growth.rate.logistic1,which =3)
+#plot(model_growth.rate.logistic1,which =3)
 ```
 
-The scale location plot shows that the red line is almost horizontal. The spread does get larger towards higher fitted values but it is centered. We can back up the claim that the errors have equal variance. 
 
 ```{r}
 plot(model_growth.rate.logistic1,which =4)
 ```
 
 
-Cook's distance measures the influence certain observations have on distributions. The higher Cook's distance is the more influential the observation is. Observations 26, 59, and 91 have a high influence on the model.
+Cook's distance measures the influence certain observations have on distributions. The higher Cook's distance is the more influential the observation is. There are three observations that we noted in the above plots that also have a high Cook's distance. They are observations 64,73 and 107. The Cook's distance associated with these three was much lower than the three previous outliers, (China, Iceland, New Zealand) that were already removed from data. 
 
 
 
