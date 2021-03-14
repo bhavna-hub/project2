@@ -136,10 +136,12 @@ gc_fit2<-SummarizeGrowth(covid.x,dat.200days[,'AZ'])
 plot(gc_fit2, lwd=3, main=paste("Azerbaijan First 200 Days, r = ",gc_fit2$vals[7]))
 
 gc_fit3<-SummarizeGrowth(covid.x,dat.200days[,'BO'])
+
 plot(gc_fit3, lwd=3, main=paste("Bolivia First 200 Days, r = ",gc_fit3$vals[7]))
 
-gc_fit4<-gc_fit3<-SummarizeGrowth(covid.x,dat.200days[,'PH'])
-plot(gc_fit3, lwd=3, main=paste("Phillipines First 200 Days, r = ",gc_fit4$vals[7]))
+gc_fit4<-gc_fit3<-SummarizeGrowth(covid.x,dat.200days[,'NZ'])
+plot(gc_fit3, lwd=3, main=paste("New Zealand First 200 Days, r = ",gc_fit4$vals[7]))
+
 ```
 
 
@@ -200,6 +202,11 @@ boxplot(unlist(to.plot.lesslockdown),
         unlist(to.plot.morelockdown),
         names=c('Less than 100 Days (n=111)', 'More than 100 Days (n=25)'),
         main='200 Day Logistic Growth Rate by Days of Lockdown')
+
+summary(unlist(to.plot.lesslockdown))
+summary(unlist(to.plot.morelockdown))
+summary(unlist(to.plot.lessmasks))
+summary(unlist(to.plot.moremasks))
 ```
 
 ```{r}
@@ -286,7 +293,7 @@ df.growthrates<-df[!na.index & !inf.index & !nan.index,]
 Our primary question of interest is whether certain policies enacted at the national and sub-national level may be associated with different outcomes in the 200 day growth rate of cumulative new cases of COVID-19 as measured by a fitted logistic growth curve. The policies we have examined include mask wearing obligations, testing implementation, lockdown enforcement, and mandatory restaurant closures.  In the Oxford dataset, which tracks daily COVID-19 cases as well as daily policy implementations through the use of indicator variables, we obtained the sum of the total number of days in which policy measures were in place over the 200 day period. Each policy indicator variable took a value of 1 if the given policy was implemented at the national or sub-national level on that day, and 0 if the policy was not enacted at both the national and sub-national level. The 200 day period is defined here with day 1 being the date on which the first case was recorded in the given country. This was done so as to ensure that measurement of growth rate was consistent for all countries in question. Although we should note that this approach fails to take into account other relevant factors, such as seasonal climate and population density. 
 
 
-The dataset which is implemented in the model contains 138 observations. In order to increase the reliability of the model, we decided to only take into account countries which recorded at least 800 cases by the 100th day after initial infection. We found that countries below this threshold tended to report numbers which were inconsistent enough (i.e. large jumps or gaps in reported data) to cause the fitted logistic growth curves to be unrepresentative of the actual spread of the disease. After doing this, we were left with 138 observations (countries) in total.
+The dataset which is implemented in the model contains 127 observations. In order to increase the reliability of the model, we decided to only take into account countries which recorded at least 800 cases by the 100th day after initial infection. We found that countries below this threshold tended to report numbers which were inconsistent enough (i.e. large jumps or gaps in reported data) to cause the fitted logistic growth curves to be unrepresentative of the actual spread of the disease. After doing this, we were left with 138 observations (countries) in total.
 
 
 It is important to emphasize that the goal of this model is not to assess causality, but to determine what policy measures, if any, are associated with different outcomes in terms of the country's 200 day logistic growth rate, $r$. 
@@ -304,7 +311,7 @@ This equation is commonly used to model population growth of organisms in differ
 
 We first employ a linear regression model of the form:
 
-$$Y_{i}=\beta_0+\beta_1x_{1,i}+\beta_2x_{2,i}+\beta_3x_{3,i}+\beta_4x_{4,i} \quad \quad i=1,...,138$$
+$$Y_{i}=\beta_0+\beta_1x_{1,i}+\beta_2x_{2,i}+\beta_3x_{3,i}+\beta_4x_{4,i} \quad \quad i=1,...,127$$
 
 
 Where each vector $x_{1,i},...,x_{4,i}$ is the number of days for which the mask, lockdown, testing, and restaurant closure policies were implemented for the i-th country over the 200 day time period. The outcome variable is the parameter $r$ for the i-th country as determined by that country's fitted logistic growth curve over the same 200 day time period. 
@@ -424,7 +431,7 @@ Cook's distance measures the influence certain observations have on distribution
 #plot(model_growth.rate.logistic2, which = 1)
 
 
-{r}
+
 #plot(model_growth.rate.logistic2, which = 2)
 ```
 
